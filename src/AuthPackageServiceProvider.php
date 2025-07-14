@@ -5,6 +5,7 @@ namespace Kaely\AuthPackage;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Schema;
 
 class AuthPackageServiceProvider extends ServiceProvider
 {
@@ -26,6 +27,9 @@ class AuthPackageServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Configurar Schema para MySQL
+        Schema::defaultStringLength(191);
+
         // Publicar configuraciones
         $this->publishes([
             __DIR__.'/../config/auth-package.php' => config_path('auth-package.php'),

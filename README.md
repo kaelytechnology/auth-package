@@ -111,6 +111,78 @@ return [
 - `GET /api/v1/auth/me` - Obtener usuario actual (requiere auth)
 - `POST /api/v1/auth/refresh` - Refrescar token (requiere auth)
 
+#### Menú Dinámico
+
+- `GET /api/v1/auth/menu` - Obtener menú dinámico del usuario
+- `GET /api/v1/auth/menu/permissions` - Obtener permisos del usuario
+- `POST /api/v1/auth/menu/has-permission` - Verificar permiso específico
+- `POST /api/v1/auth/menu/has-any-permission` - Verificar múltiples permisos
+- `GET /api/v1/auth/menu/modules` - Obtener módulos accesibles
+
+#### Gestión de Sucursales (Branches)
+
+- `GET /api/v1/auth/branches` - Listar sucursales
+- `POST /api/v1/auth/branches` - Crear sucursal
+- `GET /api/v1/auth/branches/{id}` - Obtener sucursal
+- `PUT /api/v1/auth/branches/{id}` - Actualizar sucursal
+- `DELETE /api/v1/auth/branches/{id}` - Eliminar sucursal
+- `GET /api/v1/auth/branches/active` - Sucursales activas
+
+#### Gestión de Departamentos
+
+- `GET /api/v1/auth/departments` - Listar departamentos
+- `POST /api/v1/auth/departments` - Crear departamento
+- `GET /api/v1/auth/departments/{id}` - Obtener departamento
+- `PUT /api/v1/auth/departments/{id}` - Actualizar departamento
+- `DELETE /api/v1/auth/departments/{id}` - Eliminar departamento
+- `GET /api/v1/auth/departments/active` - Departamentos activos
+- `GET /api/v1/auth/departments/by-branch/{branchId}` - Departamentos por sucursal
+
+#### Gestión de Módulos
+
+- `GET /api/v1/auth/modules` - Listar módulos
+- `POST /api/v1/auth/modules` - Crear módulo
+- `GET /api/v1/auth/modules/{id}` - Obtener módulo
+- `PUT /api/v1/auth/modules/{id}` - Actualizar módulo
+- `DELETE /api/v1/auth/modules/{id}` - Eliminar módulo
+- `GET /api/v1/auth/modules/active` - Módulos activos
+- `POST /api/v1/auth/modules/update-order` - Actualizar orden de módulos
+
+#### Gestión de Permisos
+
+- `GET /api/v1/auth/permissions` - Listar permisos
+- `POST /api/v1/auth/permissions` - Crear permiso
+- `GET /api/v1/auth/permissions/{id}` - Obtener permiso
+- `PUT /api/v1/auth/permissions/{id}` - Actualizar permiso
+- `DELETE /api/v1/auth/permissions/{id}` - Eliminar permiso
+- `GET /api/v1/auth/permissions/active` - Permisos activos
+- `GET /api/v1/auth/permissions/by-module/{moduleId}` - Permisos por módulo
+- `POST /api/v1/auth/permissions/bulk-create` - Crear permisos en lote
+
+#### Gestión de Roles
+
+- `GET /api/v1/auth/roles` - Listar roles
+- `POST /api/v1/auth/roles` - Crear rol
+- `GET /api/v1/auth/roles/{id}` - Obtener rol
+- `PUT /api/v1/auth/roles/{id}` - Actualizar rol
+- `DELETE /api/v1/auth/roles/{id}` - Eliminar rol
+- `GET /api/v1/auth/roles/active` - Roles activos
+- `POST /api/v1/auth/roles/{id}/assign-permissions` - Asignar permisos a rol
+- `GET /api/v1/auth/roles/{id}/permissions` - Permisos del rol
+
+#### Gestión de Usuarios
+
+- `GET /api/v1/auth/users` - Listar usuarios
+- `POST /api/v1/auth/users` - Crear usuario
+- `GET /api/v1/auth/users/{id}` - Obtener usuario
+- `PUT /api/v1/auth/users/{id}` - Actualizar usuario
+- `DELETE /api/v1/auth/users/{id}` - Eliminar usuario
+- `GET /api/v1/auth/users/by-branch/{branchId}` - Usuarios por sucursal
+- `GET /api/v1/auth/users/by-department/{departmentId}` - Usuarios por departamento
+- `POST /api/v1/auth/users/{id}/assign-roles` - Asignar roles a usuario
+- `GET /api/v1/auth/users/{id}/roles` - Roles del usuario
+- `GET /api/v1/auth/users/{id}/permissions` - Permisos del usuario
+
 ### Middleware
 
 El paquete incluye middleware para verificar roles y permisos:
