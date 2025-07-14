@@ -3,11 +3,16 @@
 use Illuminate\Support\Facades\Route;
 use Kaely\AuthPackage\Controllers\AuthController;
 
-$config = config('auth-package.routes');
+// Obtener configuración con valores por defecto
+$config = config('auth-package.routes', [
+    'prefix' => 'api/v1/auth',
+    'middleware' => ['api'],
+    'auth_middleware' => ['auth:sanctum'],
+]);
 
 Route::prefix($config['prefix'])
     ->middleware($config['middleware'])
-    ->group(function () {
+    ->group(function () use ($config) {
         
     // Rutas públicas de autenticación
     Route::post('/login', [AuthController::class, 'login']);
