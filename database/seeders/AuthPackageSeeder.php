@@ -1,14 +1,14 @@
 <?php
 
-namespace Kaely\AuthPackage\Database\Seeders;
+namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Kaely\AuthPackage\Models\User;
 use Kaely\AuthPackage\Models\Role;
 use Kaely\AuthPackage\Models\Permission;
 use Kaely\AuthPackage\Models\Module;
 use Kaely\AuthPackage\Models\RoleCategory;
-use Illuminate\Support\Facades\Hash;
 
 class AuthPackageSeeder extends Seeder
 {
@@ -21,35 +21,39 @@ class AuthPackageSeeder extends Seeder
         $modules = [
             [
                 'name' => 'Authentication',
-                'slug' => 'auth',
+                'code' => 'auth',
                 'description' => 'Authentication and authorization module',
                 'icon' => 'fas fa-shield-alt',
                 'route' => '/auth',
-                'is_active' => true,
+                'order' => 1,
+                'status' => true,
             ],
             [
                 'name' => 'Users',
-                'slug' => 'users',
+                'code' => 'users',
                 'description' => 'User management module',
                 'icon' => 'fas fa-users',
                 'route' => '/users',
-                'is_active' => true,
+                'order' => 2,
+                'status' => true,
             ],
             [
                 'name' => 'Roles',
-                'slug' => 'roles',
+                'code' => 'roles',
                 'description' => 'Role management module',
                 'icon' => 'fas fa-user-tag',
                 'route' => '/roles',
-                'is_active' => true,
+                'order' => 3,
+                'status' => true,
             ],
             [
                 'name' => 'Permissions',
-                'slug' => 'permissions',
+                'code' => 'permissions',
                 'description' => 'Permission management module',
                 'icon' => 'fas fa-key',
                 'route' => '/permissions',
-                'is_active' => true,
+                'order' => 4,
+                'status' => true,
             ],
         ];
 
@@ -61,17 +65,17 @@ class AuthPackageSeeder extends Seeder
         $roleCategories = [
             [
                 'name' => 'System',
-                'slug' => 'system',
+                'code' => 'system',
                 'description' => 'System level roles',
             ],
             [
                 'name' => 'Administrative',
-                'slug' => 'administrative',
+                'code' => 'administrative',
                 'description' => 'Administrative roles',
             ],
             [
                 'name' => 'User',
-                'slug' => 'user',
+                'code' => 'user',
                 'description' => 'Regular user roles',
             ],
         ];
@@ -84,21 +88,24 @@ class AuthPackageSeeder extends Seeder
         $roles = [
             [
                 'name' => 'Super Admin',
-                'slug' => 'super-admin',
+                'code' => 'super-admin',
                 'description' => 'Super administrator with all permissions',
-                'role_category_id' => RoleCategory::where('slug', 'system')->first()->id,
+                'role_category_id' => RoleCategory::where('code', 'system')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Admin',
-                'slug' => 'admin',
+                'code' => 'admin',
                 'description' => 'Administrator with most permissions',
-                'role_category_id' => RoleCategory::where('slug', 'administrative')->first()->id,
+                'role_category_id' => RoleCategory::where('code', 'administrative')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'User',
-                'slug' => 'user',
+                'code' => 'user',
                 'description' => 'Regular user with basic permissions',
-                'role_category_id' => RoleCategory::where('slug', 'user')->first()->id,
+                'role_category_id' => RoleCategory::where('code', 'user')->first()->id,
+                'status' => true,
             ],
         ];
 
@@ -111,99 +118,114 @@ class AuthPackageSeeder extends Seeder
             // Auth permissions
             [
                 'name' => 'Login',
-                'slug' => 'auth.login',
+                'code' => 'auth.login',
                 'description' => 'Can login to the system',
-                'module_id' => Module::where('slug', 'auth')->first()->id,
+                'module_id' => Module::where('code', 'auth')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Logout',
-                'slug' => 'auth.logout',
+                'code' => 'auth.logout',
                 'description' => 'Can logout from the system',
-                'module_id' => Module::where('slug', 'auth')->first()->id,
+                'module_id' => Module::where('code', 'auth')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Register',
-                'slug' => 'auth.register',
+                'code' => 'auth.register',
                 'description' => 'Can register new users',
-                'module_id' => Module::where('slug', 'auth')->first()->id,
+                'module_id' => Module::where('code', 'auth')->first()->id,
+                'status' => true,
             ],
             
             // User permissions
             [
                 'name' => 'View Users',
-                'slug' => 'users.view',
+                'code' => 'users.view',
                 'description' => 'Can view users',
-                'module_id' => Module::where('slug', 'users')->first()->id,
+                'module_id' => Module::where('code', 'users')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Create Users',
-                'slug' => 'users.create',
+                'code' => 'users.create',
                 'description' => 'Can create users',
-                'module_id' => Module::where('slug', 'users')->first()->id,
+                'module_id' => Module::where('code', 'users')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Edit Users',
-                'slug' => 'users.edit',
+                'code' => 'users.edit',
                 'description' => 'Can edit users',
-                'module_id' => Module::where('slug', 'users')->first()->id,
+                'module_id' => Module::where('code', 'users')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Delete Users',
-                'slug' => 'users.delete',
+                'code' => 'users.delete',
                 'description' => 'Can delete users',
-                'module_id' => Module::where('slug', 'users')->first()->id,
+                'module_id' => Module::where('code', 'users')->first()->id,
+                'status' => true,
             ],
             
             // Role permissions
             [
                 'name' => 'View Roles',
-                'slug' => 'roles.view',
+                'code' => 'roles.view',
                 'description' => 'Can view roles',
-                'module_id' => Module::where('slug', 'roles')->first()->id,
+                'module_id' => Module::where('code', 'roles')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Create Roles',
-                'slug' => 'roles.create',
+                'code' => 'roles.create',
                 'description' => 'Can create roles',
-                'module_id' => Module::where('slug', 'roles')->first()->id,
+                'module_id' => Module::where('code', 'roles')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Edit Roles',
-                'slug' => 'roles.edit',
+                'code' => 'roles.edit',
                 'description' => 'Can edit roles',
-                'module_id' => Module::where('slug', 'roles')->first()->id,
+                'module_id' => Module::where('code', 'roles')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Delete Roles',
-                'slug' => 'roles.delete',
+                'code' => 'roles.delete',
                 'description' => 'Can delete roles',
-                'module_id' => Module::where('slug', 'roles')->first()->id,
+                'module_id' => Module::where('code', 'roles')->first()->id,
+                'status' => true,
             ],
             
             // Permission permissions
             [
                 'name' => 'View Permissions',
-                'slug' => 'permissions.view',
+                'code' => 'permissions.view',
                 'description' => 'Can view permissions',
-                'module_id' => Module::where('slug', 'permissions')->first()->id,
+                'module_id' => Module::where('code', 'permissions')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Create Permissions',
-                'slug' => 'permissions.create',
+                'code' => 'permissions.create',
                 'description' => 'Can create permissions',
-                'module_id' => Module::where('slug', 'permissions')->first()->id,
+                'module_id' => Module::where('code', 'permissions')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Edit Permissions',
-                'slug' => 'permissions.edit',
+                'code' => 'permissions.edit',
                 'description' => 'Can edit permissions',
-                'module_id' => Module::where('slug', 'permissions')->first()->id,
+                'module_id' => Module::where('code', 'permissions')->first()->id,
+                'status' => true,
             ],
             [
                 'name' => 'Delete Permissions',
-                'slug' => 'permissions.delete',
+                'code' => 'permissions.delete',
                 'description' => 'Can delete permissions',
-                'module_id' => Module::where('slug', 'permissions')->first()->id,
+                'module_id' => Module::where('code', 'permissions')->first()->id,
+                'status' => true,
             ],
         ];
 
@@ -212,33 +234,33 @@ class AuthPackageSeeder extends Seeder
         }
 
         // Asignar permisos a roles
-        $superAdminRole = Role::where('slug', 'super-admin')->first();
-        $adminRole = Role::where('slug', 'admin')->first();
-        $userRole = Role::where('slug', 'user')->first();
+        $superAdminRole = Role::where('code', 'super-admin')->first();
+        $adminRole = Role::where('code', 'admin')->first();
+        $userRole = Role::where('code', 'user')->first();
 
         // Super Admin tiene todos los permisos
-        $superAdminRole->assignPermissions(Permission::all());
+        $superAdminRole->permissions()->attach(Permission::all()->pluck('id'));
 
         // Admin tiene permisos de auth, users y roles
-        $adminPermissions = Permission::whereIn('slug', [
+        $adminPermissions = Permission::whereIn('code', [
             'auth.login', 'auth.logout', 'auth.register',
             'users.view', 'users.create', 'users.edit', 'users.delete',
             'roles.view', 'roles.create', 'roles.edit', 'roles.delete',
         ])->get();
-        $adminRole->assignPermissions($adminPermissions);
+        $adminRole->permissions()->attach($adminPermissions->pluck('id'));
 
         // User tiene permisos básicos
-        $userPermissions = Permission::whereIn('slug', [
+        $userPermissions = Permission::whereIn('code', [
             'auth.login', 'auth.logout',
             'users.view',
         ])->get();
-        $userRole->assignPermissions($userPermissions);
+        $userRole->permissions()->attach($userPermissions->pluck('id'));
 
         // Crear usuario administrador por defecto
         $adminUser = User::create([
             'name' => 'Super Admin',
             'email' => 'admin@example.com',
-            'password' => Hash::make('123456'),
+            'password' => Hash::make('password'),
             'is_active' => true,
         ]);
 
