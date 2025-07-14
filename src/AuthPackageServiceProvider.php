@@ -58,6 +58,7 @@ class AuthPackageServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 \Kaely\AuthPackage\Console\InstallAuthPackage::class,
+                \Kaely\AuthPackage\Console\FixMigrationIssues::class,
             ]);
         }
     }

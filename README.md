@@ -44,6 +44,16 @@ php artisan migrate
 
 ### 5. Ejecutar los seeders
 
+**Opción 1: Publicar y ejecutar (recomendado)**
+```bash
+# Publicar el seeder
+php artisan vendor:publish --provider="Kaely\AuthPackage\AuthPackageServiceProvider" --tag=auth-package-seeders
+
+# Ejecutar el seeder
+php artisan db:seed --class=AuthPackageSeeder
+```
+
+**Opción 2: Ejecutar directamente**
 ```bash
 php artisan db:seed --class="Kaely\AuthPackage\Database\Seeders\AuthPackageSeeder"
 ```
@@ -54,7 +64,24 @@ php artisan db:seed --class="Kaely\AuthPackage\Database\Seeders\AuthPackageSeede
 php artisan auth-package:install
 ```
 
-**Nota:** El comando de instalación automática verificará si las tablas básicas de Laravel (`users`, `personal_access_tokens`) existen y las creará si es necesario.
+**Nota:** El comando de instalación automática:
+- Publicará configuración y migraciones
+- Ejecutará migraciones y seeders
+- Verificará que las tablas básicas de Laravel (`users`, `personal_access_tokens`) existan
+- Creará un usuario administrador por defecto
+
+### 7. Reparar problemas de migración (si es necesario)
+
+Si encuentras errores de migración, puedes usar el comando de reparación:
+
+```bash
+php artisan auth-package:fix-migrations
+```
+
+Este comando detectará y solucionará automáticamente problemas comunes como:
+- Columnas faltantes en tablas
+- Estructura de base de datos incompleta
+- Problemas de migración
 
 ## Configuración
 
@@ -318,6 +345,10 @@ Después de ejecutar los seeders, se crea un usuario administrador:
 
 - `users` - **Extendida** con campos adicionales (is_active, soft deletes, auditoría)
 - `personal_access_tokens` - **Usada** por Sanctum (creada automáticamente)
+
+## Solución de Problemas
+
+Si encuentras problemas durante la instalación o uso del paquete, consulta [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para soluciones comunes.
 
 ### Tablas nuevas del paquete
 

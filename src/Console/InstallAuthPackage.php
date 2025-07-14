@@ -73,9 +73,18 @@ class InstallAuthPackage extends Command
 
         // Ejecutar seeders
         $this->info('Running seeders...');
-        $this->callSilent('db:seed', [
-            '--class' => 'Kaely\AuthPackage\Database\Seeders\AuthPackageSeeder'
-        ]);
+        try {
+            // Intentar ejecutar el seeder publicado primero
+            $this->callSilent('db:seed', [
+                '--class' => 'AuthPackageSeeder'
+            ]);
+        } catch (\Exception $e) {
+            // Si falla, intentar ejecutar desde vendor
+            $this->warn('Published seeder not found, trying vendor seeder...');
+            $this->callSilent('db:seed', [
+                '--class' => 'Kaely\AuthPackage\Database\Seeders\AuthPackageSeeder'
+            ]);
+        }
 
         $this->info('Authentication Package installed successfully!');
         $this->info('');
@@ -84,11 +93,13 @@ class InstallAuthPackage extends Command
         $this->info('Password: password');
         $this->info('');
         $this->info('Available routes:');
-        $this->info('- POST /api/v1/auth/login');
-        $this->info('- POST /api/v1/auth/register');
-        $this->info('- POST /api/v1/auth/logout (requires auth)');
-        $this->info('- GET /api/v1/auth/me (requires auth)');
-        $this->info('- POST /api/v1/auth/refresh (requires auth)');
+        $this->info('- POST /{prefix}/login');
+        $this->info('- POST /{prefix}/register');
+        $this->info('- POST /{prefix}/logout (requires auth)');
+        $this->info('- GET /{prefix}/me (requires auth)');
+        $this->info('- POST /{prefix}/refresh (requires auth)');
+        $this->info('');
+        $this->info('Note: Routes prefix is configurable in config/auth-package.php');
         $this->info('');
         $this->info('Note: This package extends Laravel\'s default users table with additional fields.');
 

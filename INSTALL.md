@@ -84,10 +84,10 @@ php artisan migrate
    php artisan db:seed --class=AuthPackageSeeder
    ```
 
-### Opción 2: Ejecutar directamente desde vendor (si tu Laravel lo permite)
+### Opción 2: Ejecutar directamente desde vendor
 
 ```bash
-php artisan db:seed --class=Kaely\\AuthPackage\\Database\\Seeders\\AuthPackageSeeder
+php artisan db:seed --class="Kaely\AuthPackage\Database\Seeders\AuthPackageSeeder"
 ```
 
 > **Nota:** Si tienes problemas con la opción 2, usa la opción 1 (publicar y ejecutar desde tu proyecto).
@@ -202,7 +202,11 @@ composer update kaelytechnology/auth-package
 
 ---
 
-## 14. Soporte
+## 14. Solución de Problemas
+
+Si encuentras problemas durante la instalación, consulta [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para soluciones comunes.
+
+## 15. Soporte
 
 Para dudas, reportes o sugerencias, abre un issue en:
 https://github.com/kaelytechnology/auth-package
