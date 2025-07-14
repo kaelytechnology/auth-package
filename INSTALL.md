@@ -71,9 +71,26 @@ php artisan migrate
 
 ## 7. Ejecutar Seeders (Opcional pero recomendado)
 
+### Opción 1: Publicar y ejecutar desde tu proyecto (recomendado)
+
+1. **Publica los seeders:**
+   ```bash
+   php artisan vendor:publish --provider="Kaely\AuthPackage\AuthPackageServiceProvider" --tag=auth-package-seeders
+   ```
+   Esto copiará el seeder a `database/seeders/AuthPackageSeeder.php` en tu proyecto.
+
+2. **Ejecuta el seeder:**
+   ```bash
+   php artisan db:seed --class=AuthPackageSeeder
+   ```
+
+### Opción 2: Ejecutar directamente desde vendor (si tu Laravel lo permite)
+
 ```bash
-php artisan db:seed --class="Kaely\AuthPackage\Database\Seeders\AuthPackageSeeder"
+php artisan db:seed --class=Kaely\\AuthPackage\\Database\\Seeders\\AuthPackageSeeder
 ```
+
+> **Nota:** Si tienes problemas con la opción 2, usa la opción 1 (publicar y ejecutar desde tu proyecto).
 
 Esto creará roles, permisos, módulos y un usuario administrador por defecto:
 - **Email:** admin@example.com
