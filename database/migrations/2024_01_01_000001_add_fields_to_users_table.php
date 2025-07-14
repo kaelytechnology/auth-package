@@ -11,7 +11,7 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // Agregar campos adicionales a la tabla users existente
             $table->boolean('is_active')->default(true)->after('password');
-            $table->softDeletes()->after('timestamps');
+            $table->softDeletes(); // Sin after() para evitar problemas con columnas inexistentes
             
             // Campos de auditoría
             $table->unsignedBigInteger('user_add')->nullable()->after('deleted_at');
