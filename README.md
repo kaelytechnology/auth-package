@@ -92,12 +92,78 @@ return [
     ],
     
     'routes' => [
-        'prefix' => 'api/v1/auth',
+        'prefix' => 'auth', // Prefijo base sin api/v1
+        'api_prefix' => 'api', // Prefijo de API (opcional)
+        'version_prefix' => null, // Prefijo de versión (opcional, ej: v1, v2)
         'middleware' => ['api'],
         'auth_middleware' => ['auth:sanctum'],
+        'enable_versioning' => false, // Habilitar versionado automático
+        'auto_api_prefix' => true, // Agregar automáticamente el prefijo api
     ],
 ];
 ```
+
+## Configuración de Rutas
+
+El paquete permite configurar las rutas de manera muy flexible. Puedes personalizar los prefijos según tus necesidades:
+
+### Ejemplos de Configuración
+
+#### 1. Rutas simples: `/auth/`
+```php
+'routes' => [
+    'prefix' => 'auth',
+    'api_prefix' => null,
+    'version_prefix' => null,
+    'auto_api_prefix' => false,
+    'enable_versioning' => false,
+],
+```
+
+#### 2. Rutas con prefijo API: `/api/auth/`
+```php
+'routes' => [
+    'prefix' => 'auth',
+    'api_prefix' => 'api',
+    'version_prefix' => null,
+    'auto_api_prefix' => true,
+    'enable_versioning' => false,
+],
+```
+
+#### 3. Rutas con versionado: `/api/v1/auth/`
+```php
+'routes' => [
+    'prefix' => 'auth',
+    'api_prefix' => 'api',
+    'version_prefix' => 'v1',
+    'auto_api_prefix' => true,
+    'enable_versioning' => true,
+],
+```
+
+#### 4. Rutas completamente personalizadas: `/my-api/auth/`
+```php
+'routes' => [
+    'prefix' => 'auth',
+    'api_prefix' => 'my-api',
+    'version_prefix' => null,
+    'auto_api_prefix' => true,
+    'enable_versioning' => false,
+],
+```
+
+### Parámetros de Configuración
+
+- `prefix`: Prefijo base para todas las rutas (por defecto: `'auth'`)
+- `api_prefix`: Prefijo de API opcional (por defecto: `'api'`)
+- `version_prefix`: Prefijo de versión opcional (por defecto: `null`)
+- `auto_api_prefix`: Si agregar automáticamente el prefijo de API (por defecto: `true`)
+- `enable_versioning`: Si habilitar el versionado automático (por defecto: `false`)
+- `middleware`: Middleware para todas las rutas (por defecto: `['api']`)
+- `auth_middleware`: Middleware para rutas protegidas (por defecto: `['auth:sanctum']`)
+
+Para más detalles sobre la configuración de rutas, consulta [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATION.md).
 
 ## Uso
 
@@ -105,83 +171,83 @@ return [
 
 #### Autenticación
 
-- `POST /api/v1/auth/login` - Iniciar sesión
-- `POST /api/v1/auth/register` - Registrar usuario
-- `POST /api/v1/auth/logout` - Cerrar sesión (requiere auth)
-- `GET /api/v1/auth/me` - Obtener usuario actual (requiere auth)
-- `POST /api/v1/auth/refresh` - Refrescar token (requiere auth)
+- `POST /{prefix}/login` - Iniciar sesión
+- `POST /{prefix}/register` - Registrar usuario
+- `POST /{prefix}/logout` - Cerrar sesión (requiere auth)
+- `GET /{prefix}/me` - Obtener usuario actual (requiere auth)
+- `POST /{prefix}/refresh` - Refrescar token (requiere auth)
 
 #### Menú Dinámico
 
-- `GET /api/v1/auth/menu` - Obtener menú dinámico del usuario
-- `GET /api/v1/auth/menu/permissions` - Obtener permisos del usuario
-- `POST /api/v1/auth/menu/has-permission` - Verificar permiso específico
-- `POST /api/v1/auth/menu/has-any-permission` - Verificar múltiples permisos
-- `GET /api/v1/auth/menu/modules` - Obtener módulos accesibles
+- `GET /{prefix}/menu` - Obtener menú dinámico del usuario
+- `GET /{prefix}/menu/permissions` - Obtener permisos del usuario
+- `POST /{prefix}/menu/has-permission` - Verificar permiso específico
+- `POST /{prefix}/menu/has-any-permission` - Verificar múltiples permisos
+- `GET /{prefix}/menu/modules` - Obtener módulos accesibles
 
 #### Gestión de Sucursales (Branches)
 
-- `GET /api/v1/auth/branches` - Listar sucursales
-- `POST /api/v1/auth/branches` - Crear sucursal
-- `GET /api/v1/auth/branches/{id}` - Obtener sucursal
-- `PUT /api/v1/auth/branches/{id}` - Actualizar sucursal
-- `DELETE /api/v1/auth/branches/{id}` - Eliminar sucursal
-- `GET /api/v1/auth/branches/active` - Sucursales activas
+- `GET /{prefix}/branches` - Listar sucursales
+- `POST /{prefix}/branches` - Crear sucursal
+- `GET /{prefix}/branches/{id}` - Obtener sucursal
+- `PUT /{prefix}/branches/{id}` - Actualizar sucursal
+- `DELETE /{prefix}/branches/{id}` - Eliminar sucursal
+- `GET /{prefix}/branches/active` - Sucursales activas
 
 #### Gestión de Departamentos
 
-- `GET /api/v1/auth/departments` - Listar departamentos
-- `POST /api/v1/auth/departments` - Crear departamento
-- `GET /api/v1/auth/departments/{id}` - Obtener departamento
-- `PUT /api/v1/auth/departments/{id}` - Actualizar departamento
-- `DELETE /api/v1/auth/departments/{id}` - Eliminar departamento
-- `GET /api/v1/auth/departments/active` - Departamentos activos
-- `GET /api/v1/auth/departments/by-branch/{branchId}` - Departamentos por sucursal
+- `GET /{prefix}/departments` - Listar departamentos
+- `POST /{prefix}/departments` - Crear departamento
+- `GET /{prefix}/departments/{id}` - Obtener departamento
+- `PUT /{prefix}/departments/{id}` - Actualizar departamento
+- `DELETE /{prefix}/departments/{id}` - Eliminar departamento
+- `GET /{prefix}/departments/active` - Departamentos activos
+- `GET /{prefix}/departments/by-branch/{branchId}` - Departamentos por sucursal
 
 #### Gestión de Módulos
 
-- `GET /api/v1/auth/modules` - Listar módulos
-- `POST /api/v1/auth/modules` - Crear módulo
-- `GET /api/v1/auth/modules/{id}` - Obtener módulo
-- `PUT /api/v1/auth/modules/{id}` - Actualizar módulo
-- `DELETE /api/v1/auth/modules/{id}` - Eliminar módulo
-- `GET /api/v1/auth/modules/active` - Módulos activos
-- `POST /api/v1/auth/modules/update-order` - Actualizar orden de módulos
+- `GET /{prefix}/modules` - Listar módulos
+- `POST /{prefix}/modules` - Crear módulo
+- `GET /{prefix}/modules/{id}` - Obtener módulo
+- `PUT /{prefix}/modules/{id}` - Actualizar módulo
+- `DELETE /{prefix}/modules/{id}` - Eliminar módulo
+- `GET /{prefix}/modules/active` - Módulos activos
+- `POST /{prefix}/modules/update-order` - Actualizar orden de módulos
 
 #### Gestión de Permisos
 
-- `GET /api/v1/auth/permissions` - Listar permisos
-- `POST /api/v1/auth/permissions` - Crear permiso
-- `GET /api/v1/auth/permissions/{id}` - Obtener permiso
-- `PUT /api/v1/auth/permissions/{id}` - Actualizar permiso
-- `DELETE /api/v1/auth/permissions/{id}` - Eliminar permiso
-- `GET /api/v1/auth/permissions/active` - Permisos activos
-- `GET /api/v1/auth/permissions/by-module/{moduleId}` - Permisos por módulo
-- `POST /api/v1/auth/permissions/bulk-create` - Crear permisos en lote
+- `GET /{prefix}/permissions` - Listar permisos
+- `POST /{prefix}/permissions` - Crear permiso
+- `GET /{prefix}/permissions/{id}` - Obtener permiso
+- `PUT /{prefix}/permissions/{id}` - Actualizar permiso
+- `DELETE /{prefix}/permissions/{id}` - Eliminar permiso
+- `GET /{prefix}/permissions/active` - Permisos activos
+- `GET /{prefix}/permissions/by-module/{moduleId}` - Permisos por módulo
+- `POST /{prefix}/permissions/bulk-create` - Crear permisos en lote
 
 #### Gestión de Roles
 
-- `GET /api/v1/auth/roles` - Listar roles
-- `POST /api/v1/auth/roles` - Crear rol
-- `GET /api/v1/auth/roles/{id}` - Obtener rol
-- `PUT /api/v1/auth/roles/{id}` - Actualizar rol
-- `DELETE /api/v1/auth/roles/{id}` - Eliminar rol
-- `GET /api/v1/auth/roles/active` - Roles activos
-- `POST /api/v1/auth/roles/{id}/assign-permissions` - Asignar permisos a rol
-- `GET /api/v1/auth/roles/{id}/permissions` - Permisos del rol
+- `GET /{prefix}/roles` - Listar roles
+- `POST /{prefix}/roles` - Crear rol
+- `GET /{prefix}/roles/{id}` - Obtener rol
+- `PUT /{prefix}/roles/{id}` - Actualizar rol
+- `DELETE /{prefix}/roles/{id}` - Eliminar rol
+- `GET /{prefix}/roles/active` - Roles activos
+- `POST /{prefix}/roles/{id}/assign-permissions` - Asignar permisos a rol
+- `GET /{prefix}/roles/{id}/permissions` - Permisos del rol
 
 #### Gestión de Usuarios
 
-- `GET /api/v1/auth/users` - Listar usuarios
-- `POST /api/v1/auth/users` - Crear usuario
-- `GET /api/v1/auth/users/{id}` - Obtener usuario
-- `PUT /api/v1/auth/users/{id}` - Actualizar usuario
-- `DELETE /api/v1/auth/users/{id}` - Eliminar usuario
-- `GET /api/v1/auth/users/by-branch/{branchId}` - Usuarios por sucursal
-- `GET /api/v1/auth/users/by-department/{departmentId}` - Usuarios por departamento
-- `POST /api/v1/auth/users/{id}/assign-roles` - Asignar roles a usuario
-- `GET /api/v1/auth/users/{id}/roles` - Roles del usuario
-- `GET /api/v1/auth/users/{id}/permissions` - Permisos del usuario
+- `GET /{prefix}/users` - Listar usuarios
+- `POST /{prefix}/users` - Crear usuario
+- `GET /{prefix}/users/{id}` - Obtener usuario
+- `PUT /{prefix}/users/{id}` - Actualizar usuario
+- `DELETE /{prefix}/users/{id}` - Eliminar usuario
+- `GET /{prefix}/users/by-branch/{branchId}` - Usuarios por sucursal
+- `GET /{prefix}/users/by-department/{departmentId}` - Usuarios por departamento
+- `POST /{prefix}/users/{id}/assign-roles` - Asignar roles a usuario
+- `GET /{prefix}/users/{id}/roles` - Roles del usuario
+- `GET /{prefix}/users/{id}/permissions` - Permisos del usuario
 
 ### Middleware
 

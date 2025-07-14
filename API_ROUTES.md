@@ -1,7 +1,51 @@
 # Kaely Auth Package - API Routes Documentation
 
 ## Base URL
-All routes are prefixed with `/api/v1/auth` by default.
+All routes are prefixed with a configurable prefix. By default, the prefix is `/api/auth`, but you can customize it in your configuration.
+
+### Default Configuration
+- **Prefix:** `/api/auth`
+- **Example routes:** `/api/auth/login`, `/api/auth/register`
+
+### Customizable Configuration
+You can configure the routes prefix in `config/auth-package.php`:
+
+```php
+'routes' => [
+    'prefix' => 'auth', // Base prefix
+    'api_prefix' => 'api', // API prefix (optional)
+    'version_prefix' => null, // Version prefix (optional)
+    'auto_api_prefix' => true, // Auto-add API prefix
+    'enable_versioning' => false, // Enable versioning
+],
+```
+
+### Configuration Examples
+
+#### Simple routes: `/auth/`
+```php
+'prefix' => 'auth',
+'api_prefix' => null,
+'auto_api_prefix' => false,
+```
+
+#### API routes: `/api/auth/`
+```php
+'prefix' => 'auth',
+'api_prefix' => 'api',
+'auto_api_prefix' => true,
+```
+
+#### Versioned routes: `/api/v1/auth/`
+```php
+'prefix' => 'auth',
+'api_prefix' => 'api',
+'version_prefix' => 'v1',
+'auto_api_prefix' => true,
+'enable_versioning' => true,
+```
+
+For more configuration options, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATION.md).
 
 ## Authentication Routes
 
@@ -179,8 +223,24 @@ You can customize the routes prefix and middleware in your `config/auth-package.
 
 ```php
 'routes' => [
-    'prefix' => 'api/v1/auth',
+    'prefix' => 'auth', // Base prefix
+    'api_prefix' => 'api', // API prefix (optional)
+    'version_prefix' => null, // Version prefix (optional)
     'middleware' => ['api'],
     'auth_middleware' => ['auth:sanctum'],
+    'enable_versioning' => false, // Enable versioning
+    'auto_api_prefix' => true, // Auto-add API prefix
 ],
-``` 
+```
+
+### Configuration Parameters
+
+- `prefix`: Base prefix for all routes (default: `'auth'`)
+- `api_prefix`: Optional API prefix (default: `'api'`)
+- `version_prefix`: Optional version prefix (default: `null`)
+- `auto_api_prefix`: Whether to automatically add API prefix (default: `true`)
+- `enable_versioning`: Whether to enable automatic versioning (default: `false`)
+- `middleware`: Middleware for all routes (default: `['api']`)
+- `auth_middleware`: Middleware for protected routes (default: `['auth:sanctum']`)
+
+For detailed configuration examples, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATION.md). 

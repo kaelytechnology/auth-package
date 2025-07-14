@@ -21,45 +21,45 @@ class AuthPackageSeeder extends Seeder
         $modules = [
             [
                 'name' => 'Authentication',
-                'code' => 'auth',
+                'slug' => 'auth',
+                'order' => 1,
                 'description' => 'Authentication and authorization module',
                 'icon' => 'fas fa-shield-alt',
                 'route' => '/auth',
-                'order' => 1,
-                'status' => true,
+                'is_active' => true,
             ],
             [
                 'name' => 'Users',
-                'code' => 'users',
+                'slug' => 'users',
+                'order' => 2,
                 'description' => 'User management module',
                 'icon' => 'fas fa-users',
                 'route' => '/users',
-                'order' => 2,
-                'status' => true,
+                'is_active' => true,
             ],
             [
                 'name' => 'Roles',
-                'code' => 'roles',
+                'slug' => 'roles',
+                'order' => 3,
                 'description' => 'Role management module',
                 'icon' => 'fas fa-user-tag',
                 'route' => '/roles',
-                'order' => 3,
-                'status' => true,
+                'is_active' => true,
             ],
             [
                 'name' => 'Permissions',
-                'code' => 'permissions',
+                'slug' => 'permissions',
+                'order' => 4,
                 'description' => 'Permission management module',
                 'icon' => 'fas fa-key',
                 'route' => '/permissions',
-                'order' => 4,
-                'status' => true,
+                'is_active' => true,
             ],
         ];
 
         foreach ($modules as $moduleData) {
             Module::create($moduleData);
-        }
+        }   
 
         // Crear categorías de roles
         $roleCategories = [

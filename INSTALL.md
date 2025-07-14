@@ -120,21 +120,60 @@ Revisa y ajusta el archivo `config/auth-package.php` según tus necesidades:
 ```php
 return [
     'routes' => [
-        'prefix' => 'api/v1/auth',
+        'prefix' => 'auth', // Prefijo base
+        'api_prefix' => 'api', // Prefijo de API (opcional)
+        'version_prefix' => null, // Prefijo de versión (opcional)
         'middleware' => ['api'],
         'auth_middleware' => ['auth:sanctum'],
+        'enable_versioning' => false, // Habilitar versionado
+        'auto_api_prefix' => true, // Agregar automáticamente prefijo API
     ],
     // ...otros ajustes
 ];
 ```
 
+### Ejemplos de Configuración de Rutas
+
+#### Rutas simples: `/auth/`
+```php
+'prefix' => 'auth',
+'api_prefix' => null,
+'auto_api_prefix' => false,
+```
+
+#### Rutas con API: `/api/auth/`
+```php
+'prefix' => 'auth',
+'api_prefix' => 'api',
+'auto_api_prefix' => true,
+```
+
+#### Rutas con versionado: `/api/v1/auth/`
+```php
+'prefix' => 'auth',
+'api_prefix' => 'api',
+'version_prefix' => 'v1',
+'auto_api_prefix' => true,
+'enable_versioning' => true,
+```
+
+Para más opciones de configuración, consulta [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATION.md).
+
 ---
 
 ## 10. Uso de las Rutas
 
-Las rutas del paquete estarán disponibles bajo el prefijo configurado (por defecto `api/v1/auth`).
+Las rutas del paquete estarán disponibles bajo el prefijo configurado (por defecto `api/auth`).
 
 Consulta la documentación de rutas en `API_ROUTES.md` para ver todos los endpoints disponibles.
+
+### Verificar Rutas
+
+Para verificar que las rutas se han configurado correctamente:
+
+```bash
+php artisan route:list | grep auth
+```
 
 ---
 

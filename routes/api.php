@@ -12,12 +12,35 @@ use Kaely\AuthPackage\Controllers\UserController;
 
 // Obtener configuración con valores por defecto
 $config = config('auth-package.routes', [
-    'prefix' => 'api/v1/auth',
+    'prefix' => 'auth',
+    'api_prefix' => 'api',
+    'version_prefix' => null,
     'middleware' => ['api'],
     'auth_middleware' => ['auth:sanctum'],
+    'enable_versioning' => false,
+    'auto_api_prefix' => true,
 ]);
 
-Route::prefix($config['prefix'])
+// Construir el prefijo completo de manera flexible
+$prefixParts = [];
+
+// Agregar prefijo de API si está habilitado
+if ($config['auto_api_prefix'] && !empty($config['api_prefix'])) {
+    $prefixParts[] = $config['api_prefix'];
+}
+
+// Agregar prefijo de versión si está habilitado
+if ($config['enable_versioning'] && !empty($config['version_prefix'])) {
+    $prefixParts[] = $config['version_prefix'];
+}
+
+// Agregar el prefijo base
+$prefixParts[] = $config['prefix'];
+
+// Construir el prefijo final
+$finalPrefix = implode('/', array_filter($prefixParts));
+
+Route::prefix($finalPrefix)
     ->middleware($config['middleware'])
     ->group(function () use ($config) {
         

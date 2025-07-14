@@ -50,9 +50,13 @@ return [
 
     // Configuración de rutas
     'routes' => [
-        'prefix' => 'api/v1/auth',
+        'prefix' => 'auth', // Prefijo base sin api/v1
+        'api_prefix' => 'api', // Prefijo de API (opcional)
+        'version_prefix' => null, // Prefijo de versión (opcional, ej: v1, v2)
         'middleware' => ['api'],
         'auth_middleware' => ['auth:sanctum'],
+        'enable_versioning' => false, // Habilitar versionado automático
+        'auto_api_prefix' => true, // Agregar automáticamente el prefijo api
     ],
 
     // Configuración de respuestas
