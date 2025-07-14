@@ -112,7 +112,6 @@ class AuthPackageSeeder extends Seeder
         foreach ($roles as $roleData) {
             Role::create($roleData);
         }
-
         // Crear permisos
         $permissions = [
             // Auth permissions
