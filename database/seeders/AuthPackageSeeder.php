@@ -90,21 +90,21 @@ class AuthPackageSeeder extends Seeder
                 'name' => 'Super Admin',
                 'slug' => 'super-admin',
                 'description' => 'Super administrator with all permissions',
-                'role_category_id' => RoleCategory::where('code', 'system')->first()->id,
+                'role_category_id' => RoleCategory::where('slug', 'system')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Admin',
                 'slug' => 'admin',
                 'description' => 'Administrator with most permissions',
-                'role_category_id' => RoleCategory::where('code', 'administrative')->first()->id,
+                'role_category_id' => RoleCategory::where('slug', 'administrative')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'User',
                 'slug' => 'user',
                 'description' => 'Regular user with basic permissions',
-                'role_category_id' => RoleCategory::where('code', 'user')->first()->id,
+                'role_category_id' => RoleCategory::where('slug', 'user')->first()->id,
                 'status' => true,
             ],
         ];
@@ -233,15 +233,15 @@ class AuthPackageSeeder extends Seeder
         }
 
         // Asignar permisos a roles
-        $superAdminRole = Role::where('code', 'super-admin')->first();
-        $adminRole = Role::where('code', 'admin')->first();
-        $userRole = Role::where('code', 'user')->first();
+        $superAdminRole = Role::where('slug', 'super-admin')->first();
+        $adminRole = Role::where('slug', 'admin')->first();
+        $userRole = Role::where('slug', 'user')->first();
 
         // Super Admin tiene todos los permisos
         $superAdminRole->permissions()->attach(Permission::all()->pluck('id'));
 
         // Admin tiene permisos de auth, users y roles
-        $adminPermissions = Permission::whereIn('code', [
+        $adminPermissions = Permission::whereIn('slug', [
             'auth.login', 'auth.logout', 'auth.register',
             'users.view', 'users.create', 'users.edit', 'users.delete',
             'roles.view', 'roles.create', 'roles.edit', 'roles.delete',
@@ -249,7 +249,7 @@ class AuthPackageSeeder extends Seeder
         $adminRole->permissions()->attach($adminPermissions->pluck('id'));
 
         // User tiene permisos básicos
-        $userPermissions = Permission::whereIn('code', [
+        $userPermissions = Permission::whereIn('slug', [
             'auth.login', 'auth.logout',
             'users.view',
         ])->get();
