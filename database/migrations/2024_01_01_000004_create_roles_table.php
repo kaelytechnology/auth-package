@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description')->nullable();
+            $table->boolean('status')->default(true);
             $table->foreignId('role_category_id')->constrained('role_categories')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
