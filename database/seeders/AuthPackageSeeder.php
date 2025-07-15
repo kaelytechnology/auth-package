@@ -65,17 +65,17 @@ class AuthPackageSeeder extends Seeder
         $roleCategories = [
             [
                 'name' => 'System',
-                'code' => 'system',
+                'slug' => 'system',
                 'description' => 'System level roles',
             ],
             [
                 'name' => 'Administrative',
-                'code' => 'administrative',
+                'slug' => 'administrative',
                 'description' => 'Administrative roles',
             ],
             [
                 'name' => 'User',
-                'code' => 'user',
+                'slug' => 'user',
                 'description' => 'Regular user roles',
             ],
         ];
@@ -88,21 +88,21 @@ class AuthPackageSeeder extends Seeder
         $roles = [
             [
                 'name' => 'Super Admin',
-                'code' => 'super-admin',
+                'slug' => 'super-admin',
                 'description' => 'Super administrator with all permissions',
                 'role_category_id' => RoleCategory::where('code', 'system')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Admin',
-                'code' => 'admin',
+                'slug' => 'admin',
                 'description' => 'Administrator with most permissions',
                 'role_category_id' => RoleCategory::where('code', 'administrative')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'User',
-                'code' => 'user',
+                'slug' => 'user',
                 'description' => 'Regular user with basic permissions',
                 'role_category_id' => RoleCategory::where('code', 'user')->first()->id,
                 'status' => true,
@@ -117,21 +117,21 @@ class AuthPackageSeeder extends Seeder
             // Auth permissions
             [
                 'name' => 'Login',
-                'code' => 'auth.login',
+                'slug' => 'auth.login',
                 'description' => 'Can login to the system',
                 'module_id' => Module::where('slug', 'auth')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Logout',
-                'code' => 'auth.logout',
+                'slug' => 'auth.logout',
                 'description' => 'Can logout from the system',
                 'module_id' => Module::where('slug', 'auth')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Register',
-                'code' => 'auth.register',
+                'slug' => 'auth.register',
                 'description' => 'Can register new users',
                 'module_id' => Module::where('slug', 'auth')->first()->id,
                 'status' => true,
@@ -140,28 +140,28 @@ class AuthPackageSeeder extends Seeder
             // User permissions
             [
                 'name' => 'View Users',
-                'code' => 'users.view',
+                'slug' => 'users.view',
                 'description' => 'Can view users',
                 'module_id' => Module::where('slug', 'users')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Create Users',
-                'code' => 'users.create',
+                'slug' => 'users.create',
                 'description' => 'Can create users',
                 'module_id' => Module::where('slug', 'users')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Edit Users',
-                'code' => 'users.edit',
+                'slug' => 'users.edit',
                 'description' => 'Can edit users',
                 'module_id' => Module::where('slug', 'users')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Delete Users',
-                'code' => 'users.delete',
+                'slug' => 'users.delete',
                 'description' => 'Can delete users',
                 'module_id' => Module::where('slug', 'users')->first()->id,
                 'status' => true,
@@ -170,28 +170,28 @@ class AuthPackageSeeder extends Seeder
             // Role permissions
             [
                 'name' => 'View Roles',
-                'code' => 'roles.view',
+                'slug' => 'roles.view',
                 'description' => 'Can view roles',
                 'module_id' => Module::where('slug', 'roles')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Create Roles',
-                'code' => 'roles.create',
+                'slug' => 'roles.create',
                 'description' => 'Can create roles',
                 'module_id' => Module::where('slug', 'roles')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Edit Roles',
-                'code' => 'roles.edit',
+                'slug' => 'roles.edit',
                 'description' => 'Can edit roles',
                 'module_id' => Module::where('slug', 'roles')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Delete Roles',
-                'code' => 'roles.delete',
+                'slug' => 'roles.delete',
                 'description' => 'Can delete roles',
                 'module_id' => Module::where('slug', 'roles')->first()->id,
                 'status' => true,
@@ -200,28 +200,28 @@ class AuthPackageSeeder extends Seeder
             // Permission permissions
             [
                 'name' => 'View Permissions',
-                'code' => 'permissions.view',
+                'slug' => 'permissions.view',
                 'description' => 'Can view permissions',
                 'module_id' => Module::where('slug', 'permissions')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Create Permissions',
-                'code' => 'permissions.create',
+                'slug' => 'permissions.create',
                 'description' => 'Can create permissions',
                 'module_id' => Module::where('slug', 'permissions')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Edit Permissions',
-                'code' => 'permissions.edit',
+                'slug' => 'permissions.edit',
                 'description' => 'Can edit permissions',
                 'module_id' => Module::where('slug', 'permissions')->first()->id,
                 'status' => true,
             ],
             [
                 'name' => 'Delete Permissions',
-                'code' => 'permissions.delete',
+                'slug' => 'permissions.delete',
                 'description' => 'Can delete permissions',
                 'module_id' => Module::where('slug', 'permissions')->first()->id,
                 'status' => true,
