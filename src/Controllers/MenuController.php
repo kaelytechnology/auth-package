@@ -25,7 +25,7 @@ class MenuController extends Controller
         }
 
         // Obtener módulos activos
-        $modules = Module::where('status', true)
+        $modules = Module::where('is_active', true)
             ->orderBy('order')
             ->get();
 
@@ -35,14 +35,14 @@ class MenuController extends Controller
             // Verificar si el usuario tiene permisos para este módulo
             $modulePermissions = $user->getAllPermissions()
                 ->where('module_id', $module->id)
-                ->pluck('code')
+                ->pluck('slug')
                 ->toArray();
 
             if (!empty($modulePermissions)) {
                 $menuItem = [
                     'id' => $module->id,
                     'name' => $module->name,
-                    'code' => $module->code,
+                    'slug' => $module->slug,
                     'icon' => $module->icon,
                     'route' => $module->route,
                     'order' => $module->order,
@@ -54,9 +54,9 @@ class MenuController extends Controller
                 if ($request->include_permissions) {
                     $permissions = Permission::where('module_id', $module->id)
                         ->where('status', true)
-                        ->whereIn('code', $modulePermissions)
+                        ->whereIn('slug', $modulePermissions)
                         ->orderBy('name')
-                        ->get(['id', 'name', 'code', 'description']);
+                        ->get(['id', 'name', 'slug', 'description']);
 
                     $menuItem['children'] = $permissions;
                 }
@@ -72,7 +72,7 @@ class MenuController extends Controller
                 'name' => $user->name,
                 'email' => $user->email,
                 'roles' => $user->roles->pluck('name'),
-                'permissions' => $user->getAllPermissions()->pluck('code')
+                'permissions' => $user->getAllPermissions()->pluck('slug')
             ]
         ]);
     }
@@ -91,7 +91,7 @@ class MenuController extends Controller
         }
 
         $permissions = $user->getAllPermissions()
-            ->pluck('code')
+            ->pluck('slug')
             ->toArray();
 
         $roles = $user->roles
@@ -179,9 +179,9 @@ class MenuController extends Controller
         $moduleIds = $userPermissions->pluck('module_id')->unique();
 
         $modules = Module::whereIn('id', $moduleIds)
-            ->where('status', true)
+            ->where('is_active', true)
             ->orderBy('order')
-            ->get(['id', 'name', 'code', 'icon', 'route', 'order']);
+            ->get(['id', 'name', 'slug', 'icon', 'route', 'order']);
 
         return response()->json([
             'modules' => $modules,

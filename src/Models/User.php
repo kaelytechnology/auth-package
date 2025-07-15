@@ -25,6 +25,8 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
+        'branch_id',
+        'department_id',
         'user_add',
         'user_edit',
         'user_deleted'
@@ -84,6 +86,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Get the primary branch associated with the user.
+     */
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    /**
+     * Get the primary department associated with the user.
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+
+    /**
      * Check if user has a specific role.
      */
     public function hasRole($role)
@@ -101,6 +119,34 @@ class User extends Authenticatable
     public function hasPermission($permission)
     {
         return $this->roles->flatMap->permissions->contains('slug', $permission);
+    }
+
+    /**
+     * Get all permissions for the user through their roles.
+     */
+    public function getAllPermissions()
+    {
+        return $this->roles->flatMap->permissions->unique('id');
+    }
+
+    /**
+     * Check if user has a specific permission (alias for hasPermission).
+     */
+    public function hasPermissionTo($permission)
+    {
+        return $this->hasPermission($permission);
+    }
+
+    /**
+     * Check if user has any of the specified permissions.
+     */
+    public function hasAnyPermission($permissions)
+    {
+        if (is_string($permissions)) {
+            $permissions = [$permissions];
+        }
+
+        return $this->roles->flatMap->permissions->whereIn('slug', $permissions)->count() > 0;
     }
 
     /**
