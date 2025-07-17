@@ -59,6 +59,7 @@ class AuthPackageServiceProvider extends ServiceProvider
             $this->commands([
                 \Kaely\AuthPackage\Console\InstallAuthPackage::class,
                 \Kaely\AuthPackage\Console\FixMigrationIssues::class,
+                \Kaely\AuthPackage\Console\GenerateExtendableFiles::class,
             ]);
         }
     }

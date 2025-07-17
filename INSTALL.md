@@ -113,7 +113,32 @@ Este comando:
 
 ---
 
-## 9. Configuración Básica
+## 9. Generar Modelos y Controladores Extendibles (Personalización recomendada)
+
+Para permitir la personalización sin modificar el paquete, puedes generar copias extendibles de los modelos y controladores principales. Estos archivos se crearán en tu aplicación y extenderán los del paquete, permitiéndote sobreescribir métodos, agregar relaciones, endpoints, etc.
+
+### Paso a paso:
+
+1. Ejecuta el siguiente comando:
+   ```bash
+   php artisan auth-package:generate-extendable
+   ```
+   Esto generará:
+   - Modelos en `app/Models/AuthPackage/`
+   - Controladores en `app/Http/Controllers/AuthPackage/`
+
+2. Personaliza los archivos generados según tus necesidades. Por ejemplo, puedes agregar relaciones, métodos, scopes o endpoints propios.
+
+3. El paquete detectará y usará automáticamente tus modelos y controladores extendidos si existen en esas rutas.
+
+> **Tip:** Si ya existen archivos y quieres sobrescribirlos, usa la opción `--force`:
+> ```bash
+> php artisan auth-package:generate-extendable --force
+> ```
+
+---
+
+## 10. Configuración Básica
 
 Revisa y ajusta el archivo `config/auth-package.php` según tus necesidades:
 
@@ -161,7 +186,7 @@ Para más opciones de configuración, consulta [ROUTES_CONFIGURATION.md](ROUTES_
 
 ---
 
-## 10. Uso de las Rutas
+## 11. Uso de las Rutas
 
 Las rutas del paquete estarán disponibles bajo el prefijo configurado (por defecto `api/auth`).
 
@@ -177,22 +202,22 @@ php artisan route:list | grep auth
 
 ---
 
-## 11. Integración con Frontend
+## 12. Integración con Frontend
 
 - Usa los endpoints de login, logout, registro y menú dinámico para autenticar y construir el menú de navegación.
 - Protege tus rutas frontend usando los permisos y roles retornados por el backend.
 
 ---
 
-## 12. Personalización
+## 13. Personalización
 
-- Puedes extender los modelos del paquete en tu propio proyecto.
+- Puedes extender los modelos del paquete en tu propio proyecto usando el comando `auth-package:generate-extendable`.
 - Puedes modificar los controladores y recursos si publicas el código fuente.
 - Puedes cambiar el prefijo de rutas y middlewares en la configuración.
 
 ---
 
-## 13. Actualización del Paquete
+## 14. Actualización del Paquete
 
 Para actualizar a la última versión:
 
@@ -202,11 +227,11 @@ composer update kaelytechnology/auth-package
 
 ---
 
-## 14. Solución de Problemas
+## 15. Solución de Problemas
 
 Si encuentras problemas durante la instalación, consulta [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para soluciones comunes.
 
-## 15. Soporte
+## 16. Soporte
 
 Para dudas, reportes o sugerencias, abre un issue en:
 https://github.com/kaelytechnology/auth-package
