@@ -8,13 +8,13 @@ Un paquete de autenticación completo para Laravel con sistema de roles y permis
 - ✅ Sistema de roles y permisos
 - ✅ Gestión de usuarios
 - ✅ Gestión de módulos
-
 - ✅ Middleware para verificación de roles y permisos
 - ✅ API RESTful completa
 - ✅ Documentación OpenAPI
 - ✅ Migraciones y seeders incluidos
-- ✅ Configuración flexible
+- ✅ Configuración flexible con variables de entorno
 - ✅ **Extiende las tablas existentes de Laravel** (no las recrea)
+- ✅ Tests completos incluidos
 
 ## Instalación
 
@@ -85,9 +85,47 @@ Este comando detectará y solucionará automáticamente problemas comunes como:
 
 ## Configuración
 
+### Variables de Entorno
+
+El paquete utiliza variables de entorno para toda su configuración. Puedes configurar estas variables en tu archivo `.env`:
+
+```env
+# Authentication Configuration
+AUTH_GUARD=sanctum
+AUTH_PROVIDER=users
+AUTH_PASSWORD_TIMEOUT=10800
+
+# Token Configuration
+AUTH_TOKEN_EXPIRATION=604800
+AUTH_REFRESH_TOKEN_EXPIRATION=2592000
+
+# Roles and Permissions Configuration
+AUTH_ROLES_CACHE_TTL=3600
+AUTH_DEFAULT_ROLE=user
+
+# Password Validation Configuration
+AUTH_PASSWORD_MIN_LENGTH=8
+AUTH_PASSWORD_REQUIRE_SPECIAL=false
+AUTH_PASSWORD_REQUIRE_NUMBERS=true
+AUTH_PASSWORD_REQUIRE_UPPERCASE=true
+
+# Routes Configuration
+AUTH_ROUTES_PREFIX=auth
+AUTH_ROUTES_API_PREFIX=api
+AUTH_ROUTES_VERSION_PREFIX=v1
+AUTH_ROUTES_MIDDLEWARE=api
+AUTH_ROUTES_AUTH_MIDDLEWARE=auth:sanctum
+AUTH_ROUTES_ENABLE_VERSIONING=true
+AUTH_ROUTES_AUTO_API_PREFIX=true
+
+# Response Configuration
+AUTH_INCLUDE_USER_ROLES=true
+AUTH_INCLUDE_USER_PERMISSIONS=true
+```
+
 ### Configuración básica
 
-El archivo de configuración se encuentra en `config/auth-package.php`:
+El archivo de configuración se encuentra en `config/auth-package.php` y utiliza las variables de entorno:
 
 ```php
 return [
@@ -101,31 +139,31 @@ return [
     ],
     
     'auth' => [
-        'guard' => 'sanctum',
-        'provider' => 'users',
-        'password_timeout' => 10800, // 3 horas
+        'guard' => env('AUTH_GUARD', 'sanctum'),
+        'provider' => env('AUTH_PROVIDER', 'users'),
+        'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800), // 3 horas
     ],
     
     'tokens' => [
-        'expiration' => 60 * 24 * 7, // 7 días
-        'refresh_expiration' => 60 * 24 * 30, // 30 días
+        'expiration' => env('AUTH_TOKEN_EXPIRATION', 60 * 24 * 7), // 7 días
+        'refresh_expiration' => env('AUTH_REFRESH_TOKEN_EXPIRATION', 60 * 24 * 30), // 30 días
     ],
     
     'validation' => [
-        'password_min_length' => 8,
-        'password_require_special' => false,
-        'password_require_numbers' => true,
-        'password_require_uppercase' => true,
+        'password_min_length' => env('AUTH_PASSWORD_MIN_LENGTH', 8),
+        'password_require_special' => env('AUTH_PASSWORD_REQUIRE_SPECIAL', false),
+        'password_require_numbers' => env('AUTH_PASSWORD_REQUIRE_NUMBERS', true),
+        'password_require_uppercase' => env('AUTH_PASSWORD_REQUIRE_UPPERCASE', true),
     ],
     
     'routes' => [
-        'prefix' => 'auth', // Prefijo base sin api/v1
-        'api_prefix' => 'api', // Prefijo de API (opcional)
-        'version_prefix' => null, // Prefijo de versión (opcional, ej: v1, v2)
-        'middleware' => ['api'],
-        'auth_middleware' => ['auth:sanctum'],
-        'enable_versioning' => false, // Habilitar versionado automático
-        'auto_api_prefix' => true, // Agregar automáticamente el prefijo api
+        'prefix' => env('AUTH_ROUTES_PREFIX', 'auth'),
+        'api_prefix' => env('AUTH_ROUTES_API_PREFIX', 'api'),
+        'version_prefix' => env('AUTH_ROUTES_VERSION_PREFIX', null),
+        'middleware' => explode(',', env('AUTH_ROUTES_MIDDLEWARE', 'api')),
+        'auth_middleware' => explode(',', env('AUTH_ROUTES_AUTH_MIDDLEWARE', 'auth:sanctum')),
+        'enable_versioning' => env('AUTH_ROUTES_ENABLE_VERSIONING', false),
+        'auto_api_prefix' => env('AUTH_ROUTES_AUTO_API_PREFIX', true),
     ],
 ];
 ```
@@ -137,58 +175,50 @@ El paquete permite configurar las rutas de manera muy flexible. Puedes personali
 ### Ejemplos de Configuración
 
 #### 1. Rutas simples: `/auth/`
-```php
-'routes' => [
-    'prefix' => 'auth',
-    'api_prefix' => null,
-    'version_prefix' => null,
-    'auto_api_prefix' => false,
-    'enable_versioning' => false,
-],
+```env
+AUTH_ROUTES_PREFIX=auth
+AUTH_ROUTES_API_PREFIX=
+AUTH_ROUTES_VERSION_PREFIX=
+AUTH_ROUTES_ENABLE_VERSIONING=false
+AUTH_ROUTES_AUTO_API_PREFIX=false
 ```
 
 #### 2. Rutas con prefijo API: `/api/auth/`
-```php
-'routes' => [
-    'prefix' => 'auth',
-    'api_prefix' => 'api',
-    'version_prefix' => null,
-    'auto_api_prefix' => true,
-    'enable_versioning' => false,
-],
+```env
+AUTH_ROUTES_PREFIX=auth
+AUTH_ROUTES_API_PREFIX=api
+AUTH_ROUTES_VERSION_PREFIX=
+AUTH_ROUTES_ENABLE_VERSIONING=false
+AUTH_ROUTES_AUTO_API_PREFIX=true
 ```
 
 #### 3. Rutas con versionado: `/api/v1/auth/`
-```php
-'routes' => [
-    'prefix' => 'auth',
-    'api_prefix' => 'api',
-    'version_prefix' => 'v1',
-    'auto_api_prefix' => true,
-    'enable_versioning' => true,
-],
+```env
+AUTH_ROUTES_PREFIX=auth
+AUTH_ROUTES_API_PREFIX=api
+AUTH_ROUTES_VERSION_PREFIX=v1
+AUTH_ROUTES_ENABLE_VERSIONING=true
+AUTH_ROUTES_AUTO_API_PREFIX=true
 ```
 
 #### 4. Rutas completamente personalizadas: `/my-api/auth/`
-```php
-'routes' => [
-    'prefix' => 'auth',
-    'api_prefix' => 'my-api',
-    'version_prefix' => null,
-    'auto_api_prefix' => true,
-    'enable_versioning' => false,
-],
+```env
+AUTH_ROUTES_PREFIX=auth
+AUTH_ROUTES_API_PREFIX=my-api
+AUTH_ROUTES_VERSION_PREFIX=
+AUTH_ROUTES_ENABLE_VERSIONING=false
+AUTH_ROUTES_AUTO_API_PREFIX=true
 ```
 
 ### Parámetros de Configuración
 
-- `prefix`: Prefijo base para todas las rutas (por defecto: `'auth'`)
-- `api_prefix`: Prefijo de API opcional (por defecto: `'api'`)
-- `version_prefix`: Prefijo de versión opcional (por defecto: `null`)
-- `auto_api_prefix`: Si agregar automáticamente el prefijo de API (por defecto: `true`)
-- `enable_versioning`: Si habilitar el versionado automático (por defecto: `false`)
-- `middleware`: Middleware para todas las rutas (por defecto: `['api']`)
-- `auth_middleware`: Middleware para rutas protegidas (por defecto: `['auth:sanctum']`)
+- `AUTH_ROUTES_PREFIX`: Prefijo base para todas las rutas (por defecto: `'auth'`)
+- `AUTH_ROUTES_API_PREFIX`: Prefijo de API opcional (por defecto: `'api'`)
+- `AUTH_ROUTES_VERSION_PREFIX`: Prefijo de versión opcional (por defecto: `null`)
+- `AUTH_ROUTES_AUTO_API_PREFIX`: Si agregar automáticamente el prefijo de API (por defecto: `true`)
+- `AUTH_ROUTES_ENABLE_VERSIONING`: Si habilitar el versionado automático (por defecto: `false`)
+- `AUTH_ROUTES_MIDDLEWARE`: Middleware para todas las rutas (por defecto: `'api'`)
+- `AUTH_ROUTES_AUTH_MIDDLEWARE`: Middleware para rutas protegidas (por defecto: `'auth:sanctum'`)
 
 Para más detalles sobre la configuración de rutas, consulta [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATION.md).
 
@@ -211,25 +241,6 @@ Para más detalles sobre la configuración de rutas, consulta [ROUTES_CONFIGURAT
 - `POST /{prefix}/menu/has-permission` - Verificar permiso específico
 - `POST /{prefix}/menu/has-any-permission` - Verificar múltiples permisos
 - `GET /{prefix}/menu/modules` - Obtener módulos accesibles
-
-#### Gestión de Sucursales (Branches)
-
-- `GET /{prefix}/branches` - Listar sucursales
-- `POST /{prefix}/branches` - Crear sucursal
-- `GET /{prefix}/branches/{id}` - Obtener sucursal
-- `PUT /{prefix}/branches/{id}` - Actualizar sucursal
-- `DELETE /{prefix}/branches/{id}` - Eliminar sucursal
-- `GET /{prefix}/branches/active` - Sucursales activas
-
-#### Gestión de Departamentos
-
-- `GET /{prefix}/departments` - Listar departamentos
-- `POST /{prefix}/departments` - Crear departamento
-- `GET /{prefix}/departments/{id}` - Obtener departamento
-- `PUT /{prefix}/departments/{id}` - Actualizar departamento
-- `DELETE /{prefix}/departments/{id}` - Eliminar departamento
-- `GET /{prefix}/departments/active` - Departamentos activos
-- `GET /{prefix}/departments/by-branch/{branchId}` - Departamentos por sucursal
 
 #### Gestión de Módulos
 
@@ -270,8 +281,6 @@ Para más detalles sobre la configuración de rutas, consulta [ROUTES_CONFIGURAT
 - `GET /{prefix}/users/{id}` - Obtener usuario
 - `PUT /{prefix}/users/{id}` - Actualizar usuario
 - `DELETE /{prefix}/users/{id}` - Eliminar usuario
-- `GET /{prefix}/users/by-branch/{branchId}` - Usuarios por sucursal
-- `GET /{prefix}/users/by-department/{departmentId}` - Usuarios por departamento
 - `POST /{prefix}/users/{id}/assign-roles` - Asignar roles a usuario
 - `GET /{prefix}/users/{id}/roles` - Roles del usuario
 - `GET /{prefix}/users/{id}/permissions` - Permisos del usuario
@@ -339,16 +348,40 @@ Después de ejecutar los seeders, se crea un usuario administrador:
 - **Email:** admin@example.com
 - **Password:** password
 
+## Testing
+
+El paquete incluye una suite completa de tests que cubre todas las funcionalidades:
+
+### Ejecutar tests
+
+```bash
+# Ejecutar todos los tests
+php artisan test
+
+# Ejecutar tests específicos
+php artisan test --filter=AuthControllerTest
+php artisan test --filter=UserControllerTest
+php artisan test --filter=RoleControllerTest
+php artisan test --filter=MenuControllerTest
+```
+
+### Tests incluidos
+
+- **AuthControllerTest**: Tests de autenticación (login, register, logout, etc.)
+- **UserControllerTest**: Tests de gestión de usuarios (CRUD, roles, permisos)
+- **RoleControllerTest**: Tests de gestión de roles (CRUD, permisos)
+- **MenuControllerTest**: Tests de menú dinámico y verificación de permisos
+
+### Configuración de tests
+
+Los tests utilizan SQLite en memoria para mayor velocidad y aislamiento. La configuración se maneja automáticamente en el `TestCase` base.
+
 ## Estructura de la base de datos
 
 ### Tablas extendidas de Laravel
 
 - `users` - **Extendida** con campos adicionales (is_active, soft deletes, auditoría)
 - `personal_access_tokens` - **Usada** por Sanctum (creada automáticamente)
-
-## Solución de Problemas
-
-Si encuentras problemas durante la instalación o uso del paquete, consulta [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para soluciones comunes.
 
 ### Tablas nuevas del paquete
 
@@ -357,15 +390,11 @@ Si encuentras problemas durante la instalación o uso del paquete, consulta [TRO
 - `modules` - Módulos del sistema
 - `role_categories` - Categorías de roles
 - `people` - Información personal de usuarios
-- `branches` - Sucursales
-- `departments` - Departamentos
 
 ### Tablas pivot
 
 - `user_role` - Relación usuarios-roles
 - `role_permission` - Relación roles-permisos
-- `branches_users` - Relación sucursales-usuarios
-- `departments_users` - Relación departamentos-usuarios
 
 ### Campos adicionales en users
 
@@ -392,13 +421,9 @@ class User extends BaseUser
 
 ### Configurar respuestas
 
-```php
-'responses' => [
-    'include_user_roles' => true,
-    'include_user_permissions' => true,
-    'include_user_branches' => true,
-    'include_user_departments' => true,
-],
+```env
+AUTH_INCLUDE_USER_ROLES=true
+AUTH_INCLUDE_USER_PERMISSIONS=true
 ```
 
 ## Compatibilidad
@@ -414,11 +439,9 @@ class User extends BaseUser
 - ✅ **Usa** la tabla `personal_access_tokens` de Sanctum
 - ✅ **Agrega** nuevas tablas para roles, permisos, etc.
 
-## Testing
+## Solución de Problemas
 
-```bash
-php artisan test
-```
+Si encuentras problemas durante la instalación o uso del paquete, consulta [TROUBLESHOOTING.md](TROUBLESHOOTING.md) para soluciones comunes.
 
 ## Contribuir
 
@@ -426,12 +449,4 @@ php artisan test
 2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
 3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
 4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
-
-## Licencia
-
-Este paquete está bajo la licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## Soporte
-
-Para soporte, por favor abrir un issue en el repositorio del proyecto. 
+5. Abrir un Pull Request 
