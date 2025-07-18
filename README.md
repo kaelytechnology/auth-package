@@ -8,7 +8,7 @@ Un paquete de autenticación completo para Laravel con sistema de roles y permis
 - ✅ Sistema de roles y permisos
 - ✅ Gestión de usuarios
 - ✅ Gestión de módulos
-- ✅ Gestión de sucursales y departamentos
+
 - ✅ Middleware para verificación de roles y permisos
 - ✅ API RESTful completa
 - ✅ Documentación OpenAPI

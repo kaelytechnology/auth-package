@@ -67,30 +67,7 @@ For more configuration options, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATI
 - `POST /menu/has-any-permission` - Check if user has any of specified permissions
 - `GET /menu/modules` - Get user's accessible modules
 
-## Branch Management Routes
 
-### CRUD Operations
-- `GET /branches` - List all branches (with pagination and filters)
-- `POST /branches` - Create new branch
-- `GET /branches/{branch}` - Get specific branch
-- `PUT /branches/{branch}` - Update branch
-- `DELETE /branches/{branch}` - Delete branch
-
-### Utility Routes
-- `GET /branches/active` - Get all active branches for dropdown
-
-## Department Management Routes
-
-### CRUD Operations
-- `GET /departments` - List all departments (with pagination and filters)
-- `POST /departments` - Create new department
-- `GET /departments/{department}` - Get specific department
-- `PUT /departments/{department}` - Update department
-- `DELETE /departments/{department}` - Delete department
-
-### Utility Routes
-- `GET /departments/active` - Get all active departments for dropdown
-- `GET /departments/by-branch/{branchId}` - Get departments by branch
 
 ## Module Management Routes
 
@@ -143,8 +120,6 @@ For more configuration options, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATI
 - `DELETE /users/{user}` - Delete user
 
 ### Utility Routes
-- `GET /users/by-branch/{branchId}` - Get users by branch
-- `GET /users/by-department/{departmentId}` - Get users by department
 - `POST /users/{user}/assign-roles` - Assign roles to user
 - `GET /users/{user}/roles` - Get user roles
 - `GET /users/{user}/permissions` - Get user permissions
@@ -159,8 +134,6 @@ For more configuration options, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATI
 - `per_page` - Items per page (default: 15)
 
 ### Specific Filters
-- `branch_id` - Filter by branch (departments, users)
-- `department_id` - Filter by department (users)
 - `module_id` - Filter by module (permissions)
 
 ## Response Format

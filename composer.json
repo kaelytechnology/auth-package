@@ -1,6 +1,6 @@
 {
     "name": "kaelytechnology/auth-package",
-    "description": "Paquete de autenticación para Laravel con roles y permisos",
+    "description": "Paquete de autenticación para Laravel con roles y permisos (sin sucursales ni departamentos)",
     "type": "library",
     "license": "MIT",
     "authors": [

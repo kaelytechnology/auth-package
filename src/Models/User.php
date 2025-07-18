@@ -25,8 +25,6 @@ class User extends Authenticatable
         'email',
         'password',
         'is_active',
-        'branch_id',
-        'department_id',
         'user_add',
         'user_edit',
         'user_deleted'
@@ -67,38 +65,6 @@ class User extends Authenticatable
     public function roles()
     {
         return $this->belongsToMany(Role::class, 'user_role');
-    }
-
-    /**
-     * Get the branches associated with the user.
-     */
-    public function branches()
-    {
-        return $this->belongsToMany(Branch::class, 'branches_users');
-    }
-
-    /**
-     * Get the departments associated with the user.
-     */
-    public function departments()
-    {
-        return $this->belongsToMany(Department::class, 'departments_users');
-    }
-
-    /**
-     * Get the primary branch associated with the user.
-     */
-    public function branch()
-    {
-        return $this->belongsTo(Branch::class);
-    }
-
-    /**
-     * Get the primary department associated with the user.
-     */
-    public function department()
-    {
-        return $this->belongsTo(Department::class);
     }
 
     /**

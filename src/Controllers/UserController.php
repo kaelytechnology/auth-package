@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Models\User;
 use Kaely\AuthPackage\Models\Role;
-use Kaely\AuthPackage\Models\Branch;
-use Kaely\AuthPackage\Models\Department;
 use Kaely\AuthPackage\Http\Resources\UserResource;
 use Kaely\AuthPackage\Http\Resources\UserCollection;
 
@@ -20,19 +18,13 @@ class UserController extends Controller
     public function index(Request $request): JsonResponse
     {
         $users = User::query()
-            ->with(['roles', 'branch', 'department'])
+            ->with(['roles'])
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%");
             })
-            ->when($request->branch_id, function ($query, $branchId) {
-                $query->where('branch_id', $branchId);
-            })
-            ->when($request->department_id, function ($query, $departmentId) {
-                $query->where('department_id', $departmentId);
-            })
             ->when($request->status, function ($query, $status) {
-                $query->where('status', $status);
+                $query->where('is_active', $status);
             })
             ->orderBy($request->sort_by ?? 'name', $request->sort_order ?? 'asc')
             ->paginate($request->per_page ?? 15);
@@ -49,9 +41,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8',
-            'branch_id' => 'required|exists:branches,id',
-            'department_id' => 'required|exists:departments,id',
-            'status' => 'boolean',
+            'is_active' => 'boolean',
             'roles' => 'array',
             'roles.*' => 'exists:roles,id',
         ]);
@@ -60,16 +50,14 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt($request->password),
-            'branch_id' => $request->branch_id,
-            'department_id' => $request->department_id,
-            'status' => $request->status ?? true,
+            'is_active' => $request->is_active ?? true,
         ]);
 
         if ($request->has('roles')) {
             $user->roles()->attach($request->roles);
         }
 
-        $user->load(['roles', 'branch', 'department']);
+        $user->load(['roles']);
 
         return response()->json([
             'message' => 'User created successfully',
@@ -82,7 +70,7 @@ class UserController extends Controller
      */
     public function show(User $user): JsonResponse
     {
-        $user->load(['roles', 'branch', 'department']);
+        $user->load(['roles']);
         return response()->json(new UserResource($user));
     }
 
@@ -95,9 +83,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:8',
-            'branch_id' => 'required|exists:branches,id',
-            'department_id' => 'required|exists:departments,id',
-            'status' => 'boolean',
+            'is_active' => 'boolean',
             'roles' => 'array',
             'roles.*' => 'exists:roles,id',
         ]);
@@ -114,7 +100,7 @@ class UserController extends Controller
             $user->roles()->sync($request->roles);
         }
 
-        $user->load(['roles', 'branch', 'department']);
+        $user->load(['roles']);
 
         return response()->json([
             'message' => 'User updated successfully',
@@ -146,7 +132,7 @@ class UserController extends Controller
 
         $user->roles()->sync($request->roles);
 
-        $user->load(['roles', 'branch', 'department']);
+        $user->load(['roles']);
 
         return response()->json([
             'message' => 'Roles assigned successfully',
@@ -191,31 +177,5 @@ class UserController extends Controller
             ],
             'permissions' => $permissions
         ]);
-    }
-
-    /**
-     * Get users by branch.
-     */
-    public function byBranch($branchId): JsonResponse
-    {
-        $users = User::where('branch_id', $branchId)
-            ->where('status', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
-
-        return response()->json($users);
-    }
-
-    /**
-     * Get users by department.
-     */
-    public function byDepartment($departmentId): JsonResponse
-    {
-        $users = User::where('department_id', $departmentId)
-            ->where('status', true)
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
-
-        return response()->json($users);
     }
 } 

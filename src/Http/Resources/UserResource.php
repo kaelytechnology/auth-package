@@ -63,24 +63,6 @@ class UserResource extends JsonResource
             return new PersonResource($this->person);
         });
 
-        // Incluir sucursales si está configurado
-        if ($config['include_user_branches']) {
-            $data['branches'] = $this->whenLoaded('branches', function () {
-                return $this->branches->isNotEmpty()
-                    ? new BranchResource($this->branches->first())
-                    : null;
-            });
-        }
-
-        // Incluir departamentos si está configurado
-        if ($config['include_user_departments']) {
-            $data['departments'] = $this->whenLoaded('departments', function () {
-                return $this->departments->isNotEmpty()
-                    ? new DepartmentResource($this->departments->first())
-                    : null;
-            });
-        }
-
         return $data;
     }
 } 

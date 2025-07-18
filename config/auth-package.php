@@ -63,7 +63,5 @@ return [
     'responses' => [
         'include_user_roles' => true,
         'include_user_permissions' => true,
-        'include_user_branches' => true,
-        'include_user_departments' => true,
     ],
 ]; 
