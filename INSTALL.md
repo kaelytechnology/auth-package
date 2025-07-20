@@ -50,6 +50,22 @@ composer require kaelytechnology/auth-package
 
 ---
 
+## 4.1. Sincronizar variables de entorno
+
+Para agregar automáticamente las variables de entorno necesarias a tu archivo `.env`, ejecuta:
+
+```bash
+php artisan auth-package:sync-env
+```
+
+Esto copiará todas las variables de `env.example` del paquete a tu `.env` (solo las que no existan). Si quieres sobrescribir valores existentes, usa la opción `--force`:
+
+```bash
+php artisan auth-package:sync-env --force
+```
+
+---
+
 ## 5. Publicar Configuración y Migraciones
 
 ```bash
