@@ -54,7 +54,12 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        // ✅ Compatible con Laravel 12 y Sanctum
+        // Usar el guard 'web' para autenticación y luego crear token Sanctum
+        $credentials = $request->only('email', 'password');
+        
+        // Intentar autenticación con el guard web
+        if (!Auth::guard('web')->attempt($credentials)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
@@ -71,11 +76,17 @@ class AuthController extends Controller
             ]);
         }
 
+        // Crear token Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => new UserResource($user),
-            'token' => $token,
+            'success' => true,
+            'message' => 'Login successful',
+            'data' => [
+                'user' => new UserResource($user),
+                'token' => $token,
+                'token_type' => 'Bearer'
+            ]
         ]);
     }
 
