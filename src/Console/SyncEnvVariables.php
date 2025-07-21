@@ -13,7 +13,12 @@ class SyncEnvVariables extends Command
     public function handle()
     {
         $filesystem = new Filesystem();
-        $envExamplePath = __DIR__ . '/../../../env.example';
+        // Buscar env.example en vendor y fallback a la raíz del paquete (útil en desarrollo)
+        $envExamplePath = base_path('vendor/kaelytechnology/auth-package/env.example');
+        if (!$filesystem->exists($envExamplePath)) {
+            // fallback para desarrollo local del paquete
+            $envExamplePath = __DIR__ . '/../../../env.example';
+        }
         $envPath = base_path('.env');
 
         if (!$filesystem->exists($envExamplePath)) {
@@ -42,11 +47,21 @@ class SyncEnvVariables extends Command
         })->all();
 
         $added = 0;
+        $copiedVars = [];
         foreach ($newVars as $key => $value) {
             if (!in_array($key, $existingKeys) || $this->option('force')) {
-                $env[] = "$key=$value";
+                $copiedVars[] = "$key=$value";
                 $added++;
             }
+        }
+
+        if ($added > 0) {
+            $env[] = "";
+            $env[] = "# ====== KAELY AUTH PACKAGE ENV BEGIN ======";
+            foreach ($copiedVars as $line) {
+                $env[] = $line;
+            }
+            $env[] = "# ====== KAELY AUTH PACKAGE ENV END ======";
         }
 
         $filesystem->put($envPath, $env->implode("\n"));
