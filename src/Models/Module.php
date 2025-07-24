@@ -17,6 +17,7 @@ class Module extends Model
         'icon',
         'route',
         'is_active',
+        'parent_id',
         'user_add',
         'user_edit',
         'user_deleted'
@@ -24,10 +25,26 @@ class Module extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'parent_id' => 'integer',
         'user_add' => 'integer',
         'user_edit' => 'integer',
         'user_deleted' => 'integer',
     ];
+    /**
+     * Relación: módulo padre
+     */
+    public function parent()
+    {
+        return $this->belongsTo(Module::class, 'parent_id');
+    }
+
+    /**
+     * Relación: módulos hijos
+     */
+    public function children()
+    {
+        return $this->hasMany(Module::class, 'parent_id');
+    }
 
     /**
      * Get the permissions that belong to this module.

@@ -43,9 +43,14 @@ class ModuleController extends Controller
             'route' => 'nullable|string|max:255',
             'order' => 'integer|min:0',
             'status' => 'boolean',
+            'parent_id' => 'nullable|integer|exists:modules,id',
         ]);
 
-        $module = Module::create($request->all());
+        $data = $request->all();
+        if (!isset($data['parent_id'])) {
+            $data['parent_id'] = 0;
+        }
+        $module = Module::create($data);
 
         return response()->json([
             'message' => 'Module created successfully',
@@ -74,9 +79,14 @@ class ModuleController extends Controller
             'route' => 'nullable|string|max:255',
             'order' => 'integer|min:0',
             'status' => 'boolean',
+            'parent_id' => 'nullable|integer|exists:modules,id',
         ]);
 
-        $module->update($request->all());
+        $data = $request->all();
+        if (!isset($data['parent_id'])) {
+            $data['parent_id'] = 0;
+        }
+        $module->update($data);
 
         return response()->json([
             'message' => 'Module updated successfully',

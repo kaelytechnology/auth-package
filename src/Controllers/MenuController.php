@@ -24,46 +24,54 @@ class MenuController extends Controller
             ], 401);
         }
 
-        // Obtener módulos activos
+        // Obtener módulos activos y permisos del usuario
         $modules = Module::where('is_active', true)
+            ->with('children')
             ->orderBy('order')
             ->get();
 
-        $menu = [];
-
-        foreach ($modules as $module) {
-            // Verificar si el usuario tiene permisos para este módulo
-            $modulePermissions = $user->getAllPermissions()
-                ->where('module_id', $module->id)
-                ->pluck('slug')
-                ->toArray();
-
-            if (!empty($modulePermissions)) {
-                $menuItem = [
-                    'id' => $module->id,
-                    'name' => $module->name,
-                    'slug' => $module->slug,
-                    'icon' => $module->icon,
-                    'route' => $module->route,
-                    'order' => $module->order,
-                    'permissions' => $modulePermissions,
-                    'children' => []
-                ];
-
-                // Agregar permisos como submenús si es necesario
-                if ($request->include_permissions) {
-                    $permissions = Permission::where('module_id', $module->id)
-                        ->where('status', true)
-                        ->whereIn('slug', $modulePermissions)
-                        ->orderBy('name')
-                        ->get(['id', 'name', 'slug', 'description']);
-
-                    $menuItem['children'] = $permissions;
-                }
-
-                $menu[] = $menuItem;
-            }
+        $userPermissions = $user->getAllPermissions();
+        $modulePermissionsMap = [];
+        foreach ($userPermissions as $perm) {
+            $modulePermissionsMap[$perm->module_id][] = $perm->slug;
         }
+
+        // Filtrar módulos a los que el usuario tiene acceso
+        $modules = $modules->filter(function ($module) use ($modulePermissionsMap) {
+            return isset($modulePermissionsMap[$module->id]);
+        });
+
+        // Construir árbol de menú
+        $menuTree = function ($modules, $parentId = 0) use (&$menuTree, $modulePermissionsMap, $request) {
+            $tree = [];
+            foreach ($modules as $module) {
+                if ((int)$module->parent_id === (int)$parentId) {
+                    $item = [
+                        'id' => $module->id,
+                        'name' => $module->name,
+                        'slug' => $module->slug,
+                        'icon' => $module->icon,
+                        'route' => $module->route,
+                        'order' => $module->order,
+                        'permissions' => $modulePermissionsMap[$module->id] ?? [],
+                        'children' => $menuTree($modules, $module->id)
+                    ];
+                    // Agregar permisos como submenús si es necesario
+                    if ($request->include_permissions) {
+                        $permissions = Permission::where('module_id', $module->id)
+                            ->where('status', true)
+                            ->whereIn('slug', $modulePermissionsMap[$module->id] ?? [])
+                            ->orderBy('name')
+                            ->get(['id', 'name', 'slug', 'description']);
+                        $item['children'] = array_merge($item['children'], $permissions->toArray());
+                    }
+                    $tree[] = $item;
+                }
+            }
+            return $tree;
+        };
+
+        $menu = $menuTree($modules, 0);
 
         return response()->json([
             'data' => $menu,
@@ -181,10 +189,26 @@ class MenuController extends Controller
         $modules = Module::whereIn('id', $moduleIds)
             ->where('is_active', true)
             ->orderBy('order')
-            ->get(['id', 'name', 'slug', 'icon', 'route', 'order']);
+            ->get(['id', 'name', 'slug', 'icon', 'route', 'order', 'parent_id']);
+
+        // Construir árbol de módulos
+        $buildTree = function ($modules, $parentId = 0) use (&$buildTree) {
+            $tree = [];
+            foreach ($modules as $module) {
+                if ((int)$module->parent_id === (int)$parentId) {
+                    $children = $buildTree($modules, $module->id);
+                    $item = $module->toArray();
+                    $item['children'] = $children;
+                    $tree[] = $item;
+                }
+            }
+            return $tree;
+        };
+
+        $modulesTree = $buildTree($modules, 0);
 
         return response()->json([
-            'modules' => $modules,
+            'modules' => $modulesTree,
             'total_permissions' => $userPermissions->count()
         ]);
     }

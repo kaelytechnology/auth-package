@@ -17,6 +17,8 @@ return new class extends Migration
             $table->string('icon')->nullable();
             $table->string('route')->nullable();
             $table->boolean('is_active')->default(true);
+            // Campo para árbol de módulos (parent_id)
+            $table->unsignedBigInteger('parent_id')->default(0);
             $table->timestamps();
             $table->softDeletes();
             
@@ -28,6 +30,8 @@ return new class extends Migration
             $table->foreign('user_add')->references('id')->on('users')->onDelete('set null');
             $table->foreign('user_edit')->references('id')->on('users')->onDelete('set null');
             $table->foreign('user_deleted')->references('id')->on('users')->onDelete('set null');
+            // Foreign key para parent_id (puede ser 0 para raíz, o id de otro módulo)
+            $table->foreign('parent_id')->references('id')->on('modules')->onDelete('cascade');
         });
     }
 

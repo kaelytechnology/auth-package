@@ -15,7 +15,7 @@ return new class extends Migration
             
             // Campos de auditoría
             $table->unsignedBigInteger('user_add')->nullable()->after('deleted_at');
-            $table->unsignedBigInteger('user_edit')->nullable()->after('user_add');
+            $table->unsignedBigInteger('user_edit')->nullable()->after('user_add'); 
             $table->unsignedBigInteger('user_deleted')->nullable()->after('user_edit');
             
             // Agregar claves foráneas para auditoría

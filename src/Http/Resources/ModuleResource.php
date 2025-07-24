@@ -17,12 +17,14 @@ class ModuleResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'code' => $this->code,
+            'code' => $this->code ?? $this->slug,
             'description' => $this->description,
             'icon' => $this->icon,
             'route' => $this->route,
             'order' => $this->order,
-            'status' => $this->status,
+            'status' => $this->status ?? $this->is_active,
+            'parent_id' => $this->parent_id,
+            'children' => ModuleResource::collection($this->whenLoaded('children')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];
