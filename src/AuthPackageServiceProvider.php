@@ -60,6 +60,7 @@ class AuthPackageServiceProvider extends ServiceProvider
                 \Kaely\AuthPackage\Console\InstallAuthPackage::class,
                 \Kaely\AuthPackage\Console\FixMigrationIssues::class,
                 \Kaely\AuthPackage\Console\GenerateExtendableFiles::class,
+                \Kaely\AuthPackage\Console\SyncEnvVariables::class,
             ]);
         }
     }
