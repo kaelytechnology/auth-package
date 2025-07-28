@@ -4,6 +4,7 @@ namespace Kaely\AuthPackage\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Kaely\AuthPackage\Http\Resources\PersonResource;
 
 /**
  * @OA\Schema(
@@ -65,4 +66,4 @@ class UserResource extends JsonResource
 
         return $data;
     }
-} 
+}
