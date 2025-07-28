@@ -83,6 +83,28 @@ El Service Provider es el punto de entrada del paquete y se encarga de:
 - Validación de credenciales
 - Verificación de estado de usuario
 
+#### RoleCategoryController
+- CRUD completo para categorías de roles
+- Listado con paginación y filtros de búsqueda
+- Validación de integridad referencial
+- Endpoints para obtener roles por categoría
+- Auto-generación de slugs
+
+#### PersonController
+- CRUD completo para información personal de usuarios
+- Listado con paginación y filtros de búsqueda
+- Validación de unicidad (un usuario = una persona)
+- Endpoints utilitarios para estadísticas
+- Gestión de datos personales completos
+
+#### UserRoleController
+- Gestión granular de asignaciones de roles a usuarios
+- Operaciones masivas (asignación, eliminación, sincronización)
+- Listado con filtros por usuario, rol, estado y categoría
+- Consultas especializadas para usuarios por rol y roles por usuario
+- Estadísticas avanzadas de distribución de roles
+- Validaciones para prevenir asignaciones duplicadas
+
 ### 4. Middleware
 
 #### CheckRole
@@ -395,4 +417,4 @@ ALTER TABLE users ADD COLUMN user_deleted UNSIGNED BIGINT NULL;
 - ✅ **No afecta** datos existentes
 - ✅ **Agrega** campos con valores por defecto
 - ✅ **Mantiene** funcionalidad existente
-- ✅ **Extiende** capacidades sin romper nada 
+- ✅ **Extiende** capacidades sin romper nada

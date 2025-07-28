@@ -96,6 +96,19 @@ For more configuration options, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATI
 - `GET /permissions/by-module/{moduleId}` - Get permissions by module
 - `POST /permissions/bulk-create` - Bulk create permissions for a module
 
+## Role Category Management Routes
+
+### CRUD Operations
+- `GET /role-categories` - List all role categories (with pagination and filters)
+- `POST /role-categories` - Create new role category
+- `GET /role-categories/{roleCategory}` - Get specific role category
+- `PUT /role-categories/{roleCategory}` - Update role category
+- `DELETE /role-categories/{roleCategory}` - Delete role category
+
+### Utility Routes
+- `GET /role-categories/active` - Get all role categories for dropdown
+- `GET /role-categories/{roleCategory}/roles` - Get roles by category
+
 ## Role Management Routes
 
 ### CRUD Operations
@@ -110,6 +123,18 @@ For more configuration options, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATI
 - `POST /roles/{role}/assign-permissions` - Assign permissions to role
 - `GET /roles/{role}/permissions` - Get role permissions
 
+## People Management Routes
+
+### CRUD Operations
+- `GET /people` - List all people (with pagination and filters)
+- `POST /people` - Create new person
+- `GET /people/{person}` - Get specific person
+- `PUT /people/{person}` - Update person
+- `DELETE /people/{person}` - Delete person
+
+### Utility Routes
+- `GET /people/statistics` - Get people statistics
+
 ## User Management Routes
 
 ### CRUD Operations
@@ -123,6 +148,25 @@ For more configuration options, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATI
 - `POST /users/{user}/assign-roles` - Assign roles to user
 - `GET /users/{user}/roles` - Get user roles
 - `GET /users/{user}/permissions` - Get user permissions
+- `GET /users/{user}/person` - Get user's personal information
+- `POST /users/{user}/person` - Create or update user's personal information
+
+## User-Role Assignment Management Routes
+
+### Assignment Operations
+- `GET /user-roles` - List all user-role assignments (with pagination and filters)
+- `POST /user-roles` - Assign a role to a user
+- `DELETE /user-roles` - Remove a role from a user
+
+### Bulk Operations
+- `POST /user-roles/bulk-assign` - Assign roles to multiple users
+- `POST /user-roles/bulk-remove` - Remove roles from multiple users
+- `POST /user-roles/sync/{user}` - Sync user roles (replace all current roles)
+
+### Utility Routes
+- `GET /user-roles/statistics` - Get user-role assignment statistics
+- `GET /user-roles/by-role/{role}` - Get users by role
+- `GET /user-roles/by-user/{user}` - Get roles by user
 
 ## Query Parameters
 
@@ -216,4 +260,4 @@ You can customize the routes prefix and middleware in your `config/auth-package.
 - `middleware`: Middleware for all routes (default: `['api']`)
 - `auth_middleware`: Middleware for protected routes (default: `['auth:sanctum']`)
 
-For detailed configuration examples, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATION.md). 
+For detailed configuration examples, see [ROUTES_CONFIGURATION.md](ROUTES_CONFIGURATION.md).

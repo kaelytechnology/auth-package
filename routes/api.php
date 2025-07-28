@@ -6,7 +6,10 @@ use Kaely\AuthPackage\Controllers\ModuleController;
 use Kaely\AuthPackage\Controllers\PermissionController;
 use Kaely\AuthPackage\Controllers\MenuController;
 use Kaely\AuthPackage\Controllers\RoleController;
+use Kaely\AuthPackage\Controllers\RoleCategoryController;
+use Kaely\AuthPackage\Controllers\PersonController;
 use Kaely\AuthPackage\Controllers\UserController;
+use Kaely\AuthPackage\Controllers\UserRoleController;
 
 // Obtener configuración con valores por defecto
 $config = config('auth-package.routes', [
@@ -84,6 +87,17 @@ Route::prefix($finalPrefix)
             Route::delete('/{permission}', [PermissionController::class, 'destroy']);
         });
         
+        // Rutas de categorías de roles
+        Route::prefix('role-categories')->group(function () {
+            Route::get('/', [RoleCategoryController::class, 'index']);
+            Route::post('/', [RoleCategoryController::class, 'store']);
+            Route::get('/active', [RoleCategoryController::class, 'active']);
+            Route::get('/{roleCategory}', [RoleCategoryController::class, 'show']);
+            Route::put('/{roleCategory}', [RoleCategoryController::class, 'update']);
+            Route::delete('/{roleCategory}', [RoleCategoryController::class, 'destroy']);
+            Route::get('/{roleCategory}/roles', [RoleCategoryController::class, 'roles']);
+        });
+        
         // Rutas de roles
         Route::prefix('roles')->group(function () {
             Route::get('/', [RoleController::class, 'index']);
@@ -96,6 +110,16 @@ Route::prefix($finalPrefix)
             Route::get('/{role}/permissions', [RoleController::class, 'permissions']);
         });
         
+        // Rutas de personas
+        Route::prefix('people')->group(function () {
+            Route::get('/', [PersonController::class, 'index']);
+            Route::post('/', [PersonController::class, 'store']);
+            Route::get('/statistics', [PersonController::class, 'statistics']);
+            Route::get('/{person}', [PersonController::class, 'show']);
+            Route::put('/{person}', [PersonController::class, 'update']);
+            Route::delete('/{person}', [PersonController::class, 'destroy']);
+        });
+        
         // Rutas de usuarios
         Route::prefix('users')->group(function () {
             Route::get('/', [UserController::class, 'index']);
@@ -106,6 +130,21 @@ Route::prefix($finalPrefix)
             Route::post('/{user}/assign-roles', [UserController::class, 'assignRoles']);
             Route::get('/{user}/roles', [UserController::class, 'roles']);
             Route::get('/{user}/permissions', [UserController::class, 'permissions']);
+            Route::get('/{user}/person', [PersonController::class, 'byUser']);
+            Route::post('/{user}/person', [PersonController::class, 'createOrUpdateForUser']);
         });
+        
+        // Rutas de asignaciones usuario-rol
+         Route::prefix('user-roles')->group(function () {
+             Route::get('/', [UserRoleController::class, 'index']);
+             Route::post('/', [UserRoleController::class, 'store']);
+             Route::delete('/', [UserRoleController::class, 'destroy']);
+             Route::post('/bulk-assign', [UserRoleController::class, 'bulkAssign']);
+             Route::post('/bulk-remove', [UserRoleController::class, 'bulkRemove']);
+             Route::get('/statistics', [UserRoleController::class, 'statistics']);
+             Route::get('/by-role/{role}', [UserRoleController::class, 'usersByRole']);
+             Route::get('/by-user/{user}', [UserRoleController::class, 'rolesByUser']);
+             Route::post('/sync/{user}', [UserRoleController::class, 'syncRoles']);
+         });
     });
-}); 
+});
