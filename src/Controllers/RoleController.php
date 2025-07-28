@@ -21,7 +21,7 @@ class RoleController extends Controller
             ->with('permissions')
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%");
+                      ->orWhere('slug', 'like', "%{$search}%");
             })
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
@@ -39,7 +39,7 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100|unique:roles,code',
+            'slug' => 'required|string|max:100|unique:roles,slug',
             'description' => 'nullable|string|max:500',
             'status' => 'boolean',
             'permissions' => 'array',
@@ -76,7 +76,7 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100|unique:roles,code,' . $role->id,
+            'slug' => 'required|string|max:100|unique:roles,slug,' . $role->id,
             'description' => 'nullable|string|max:500',
             'status' => 'boolean',
             'permissions' => 'array',
@@ -123,7 +123,7 @@ class RoleController extends Controller
     {
         $roles = Role::where('status', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'code']);
+            ->get(['id', 'name', 'slug']);
 
         return response()->json($roles);
     }
@@ -162,7 +162,7 @@ class RoleController extends Controller
             'role' => [
                 'id' => $role->id,
                 'name' => $role->name,
-                'code' => $role->code,
+                'slug' => $role->slug,
             ],
             'permissions' => $permissions
         ]);

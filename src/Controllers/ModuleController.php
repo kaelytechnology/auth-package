@@ -19,7 +19,7 @@ class ModuleController extends Controller
         $modules = Module::query()
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%");
+                      ->orWhere('slug', 'like', "%{$search}%");
             })
             ->when($request->status, function ($query, $status) {
                 $query->where('status', $status);
@@ -37,7 +37,7 @@ class ModuleController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:modules,code',
+            'slug' => 'required|string|max:50|unique:modules,slug',
             'description' => 'nullable|string|max:500',
             'icon' => 'nullable|string|max:100',
             'route' => 'nullable|string|max:255',
@@ -73,7 +73,7 @@ class ModuleController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:50|unique:modules,code,' . $module->id,
+            'slug' => 'required|string|max:50|unique:modules,slug,' . $module->id,
             'description' => 'nullable|string|max:500',
             'icon' => 'nullable|string|max:100',
             'route' => 'nullable|string|max:255',
@@ -120,7 +120,7 @@ class ModuleController extends Controller
     {
         $modules = Module::where('status', true)
             ->orderBy('order')
-            ->get(['id', 'name', 'code', 'icon', 'route', 'order']);
+            ->get(['id', 'name', 'slug', 'icon', 'route', 'order']);
 
         return response()->json($modules);
     }

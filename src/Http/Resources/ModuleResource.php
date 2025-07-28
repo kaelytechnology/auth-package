@@ -17,7 +17,7 @@ class ModuleResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'code' => $this->code ?? $this->slug,
+            'slug' => $this->slug ?? $this->slug,
             'description' => $this->description,
             'icon' => $this->icon,
             'route' => $this->route,

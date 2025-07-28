@@ -20,7 +20,7 @@ class PermissionController extends Controller
             ->with('module')
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('code', 'like', "%{$search}%");
+                      ->orWhere('slug', 'like', "%{$search}%");
             })
             ->when($request->module_id, function ($query, $moduleId) {
                 $query->where('module_id', $moduleId);
@@ -41,7 +41,7 @@ class PermissionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100|unique:permissions,code',
+            'slug' => 'required|string|max:100|unique:permissions,slug',
             'module_id' => 'required|exists:modules,id',
             'description' => 'nullable|string|max:500',
             'status' => 'boolean',
@@ -71,7 +71,7 @@ class PermissionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100|unique:permissions,code,' . $permission->id,
+            'slug' => 'required|string|max:100|unique:permissions,slug,' . $permission->id,
             'module_id' => 'required|exists:modules,id',
             'description' => 'nullable|string|max:500',
             'status' => 'boolean',
@@ -112,7 +112,7 @@ class PermissionController extends Controller
         $permissions = Permission::where('module_id', $moduleId)
             ->where('status', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'code']);
+            ->get(['id', 'name', 'slug']);
 
         return response()->json($permissions);
     }
@@ -125,7 +125,7 @@ class PermissionController extends Controller
         $permissions = Permission::with('module')
             ->where('status', true)
             ->orderBy('name')
-            ->get(['id', 'name', 'code', 'module_id']);
+            ->get(['id', 'name', 'slug', 'module_id']);
 
         return response()->json($permissions);
     }
@@ -139,7 +139,7 @@ class PermissionController extends Controller
             'module_id' => 'required|exists:modules,id',
             'permissions' => 'required|array',
             'permissions.*.name' => 'required|string|max:255',
-            'permissions.*.code' => 'required|string|max:100',
+            'permissions.*.slug' => 'required|string|max:100',
             'permissions.*.description' => 'nullable|string|max:500',
         ]);
 
