@@ -46,14 +46,14 @@ Route::prefix($finalPrefix)
     ->group(function () use ($config) {
         
     // Rutas públicas de autenticación
-    Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
     
     // Rutas protegidas de autenticación
     Route::middleware($config['auth_middleware'])->group(function () {
-        Route::post('/logout', [AuthController::class, 'logout']);
-        Route::get('/me', [AuthController::class, 'me']);
-        Route::post('/refresh', [AuthController::class, 'refresh']);
+        Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('/me', [AuthController::class, 'me'])->name('me');
+        Route::post('/refresh', [AuthController::class, 'refresh'])->name('refresh');
         
         // Rutas de menú dinámico
         Route::prefix('menu')->group(function () {
