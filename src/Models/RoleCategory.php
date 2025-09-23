@@ -14,12 +14,14 @@ class RoleCategory extends Model
         'name',
         'slug',
         'description',
+        'is_active',
         'user_add',
         'user_edit',
         'user_deleted'
     ];
 
     protected $casts = [
+        'is_active' => 'boolean',
         'user_add' => 'integer',
         'user_edit' => 'integer',
         'user_deleted' => 'integer',
@@ -56,4 +58,4 @@ class RoleCategory extends Model
     {
         return $this->belongsTo(User::class, 'user_deleted');
     }
-} 
+}

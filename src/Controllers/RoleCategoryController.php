@@ -5,6 +5,7 @@ namespace Kaely\AuthPackage\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Kaely\AuthPackage\Models\RoleCategory;
 use Kaely\AuthPackage\Http\Resources\RoleCategoryResource;
 use Kaely\AuthPackage\Http\Resources\RoleCategoryCollection;
@@ -74,52 +75,170 @@ class RoleCategoryController extends Controller
     /**
      * Update the specified role category.
      */
-    public function update(Request $request, RoleCategory $roleCategory): JsonResponse
+    public function update(Request $request, RoleCategory $roleCategory = null): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'slug' => 'nullable|string|max:100|unique:role_categories,slug,' . $roleCategory->id,
-            'description' => 'nullable|string|max:500',
-        ]);
+        try {
+            // Obtener parámetros de la ruta
+            $routeParams = $request->route()->parameters();            
+           
+            // Obtener el ID de la categoría de rol desde múltiples fuentes
+            $roleCategoryId = null;
+            
+            if ($roleCategory && $roleCategory->id) {
+                $roleCategoryId = $roleCategory->id;
+            } elseif (isset($routeParams['roleCategory'])) {
+                $roleCategoryId = $routeParams['roleCategory'];
+            } elseif (isset($routeParams['role_category'])) {
+                $roleCategoryId = $routeParams['role_category'];
+            } elseif ($request->has('role_category_id')) {
+                $roleCategoryId = $request->input('role_category_id');
+            } elseif ($request->has('id')) {
+                $roleCategoryId = $request->input('id');
+            }
 
-        $data = $request->all();
-        
-        // Auto-generar slug si no se proporciona
-        if (empty($data['slug'])) {
-            $data['slug'] = Str::slug($data['name']);
+            if (!$roleCategoryId) {
+                
+                
+                return response()->json([
+                    'message' => 'Role Category ID not found',
+                    'debug_info' => [
+                        'route_params' => $routeParams,
+                        'request_data' => $request->all()
+                    ]
+                ], 400);
+            }
+
+            // Si no tenemos el objeto roleCategory o no tiene ID, buscarlo
+            if (!$roleCategory || !$roleCategory->id) {
+                $roleCategory = RoleCategory::find($roleCategoryId);
+                
+                if (!$roleCategory) {
+                    
+                    return response()->json([
+                        'message' => 'Role Category not found'
+                    ], 404);
+                }
+            }
+
+
+            // Validar los datos con el ID correcto para la regla unique
+            $request->validate([
+                'name' => 'required|string|max:255',
+                //'slug' => 'nullable|string|max:100|unique:role_categories,slug,' . $roleCategory->id,
+                'description' => 'nullable|string|max:500',
+                'is_active' => 'nullable|boolean',
+            ]);
+
+            $data = $request->all(); 
+          
+            // Agregar usuario que edita
+            $data['user_edit'] = Auth::id();
+
+          
+
+            $roleCategory->update($data);
+            $roleCategory->load('roles');
+
+            
+
+            return response()->json([
+                'message' => 'Role category updated successfully',
+                'data' => new RoleCategoryResource($roleCategory)
+            ]);
+
+        } catch (\Exception $e) {
+            
+
+            return response()->json([
+                'message' => 'Error updating role category',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        
-        // Agregar usuario que edita
-        $data['user_edit'] = auth()->id();
-
-        $roleCategory->update($data);
-        $roleCategory->load('roles');
-
-        return response()->json([
-            'message' => 'Role category updated successfully',
-            'data' => new RoleCategoryResource($roleCategory)
-        ]);
     }
 
     /**
      * Remove the specified role category.
      */
-    public function destroy(RoleCategory $roleCategory): JsonResponse
+    public function destroy(RoleCategory $roleCategory = null): JsonResponse
     {
-        // Verificar si hay roles asociados
-        if ($roleCategory->roles()->count() > 0) {
+        try {
+            // Obtener parámetros de la ruta
+            $routeParams = request()->route()->parameters();
+
+            // Obtener el ID de la categoría de rol desde múltiples fuentes
+            $roleCategoryId = null;
+            
+            if ($roleCategory && $roleCategory->id) {
+                $roleCategoryId = $roleCategory->id;
+            } elseif (isset($routeParams['roleCategory'])) {
+                $roleCategoryId = $routeParams['roleCategory'];
+            } elseif (isset($routeParams['role_category'])) {
+                $roleCategoryId = $routeParams['role_category'];
+            } elseif (request()->has('role_category_id')) {
+                $roleCategoryId = request()->input('role_category_id');
+            } elseif (request()->has('id')) {
+                $roleCategoryId = request()->input('id');
+            }
+
+            if (!$roleCategoryId) {
+                
+                
+                return response()->json([
+                    'message' => 'Role Category ID not found',
+                    'debug_info' => [
+                        'route_params' => $routeParams,
+                        'request_data' => request()->all()
+                    ]
+                ], 400);
+            }
+
+            // Si no tenemos el objeto roleCategory o no tiene ID, buscarlo
+            if (!$roleCategory || !$roleCategory->id) {
+                $roleCategory = RoleCategory::find($roleCategoryId);
+                
+                if (!$roleCategory) {
+                    
+                    
+                    return response()->json([
+                        'message' => 'Role Category not found'
+                    ], 404);
+                }
+            }
+
+           
+
+            // Verificar si hay roles asociados
+            if ($roleCategory->roles()->count() > 0) {
+                
+                
+                return response()->json([
+                    'message' => 'Cannot delete role category with associated roles'
+                ], 422);
+            }
+
+            $deletedRoleCategory = $roleCategory->toArray();
+
+            // Agregar usuario que elimina antes del soft delete
+            $roleCategory->update(['user_deleted' => auth()->id()]);
+            
+           
+
+            $roleCategory->delete();
+
+            
+
             return response()->json([
-                'message' => 'Cannot delete role category with associated roles'
-            ], 422);
+                'message' => 'Role category deleted successfully'
+            ]);
+
+        } catch (\Exception $e) {
+           
+
+            return response()->json([
+                'message' => 'Error deleting role category',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // Agregar usuario que elimina antes del soft delete
-        $roleCategory->update(['user_deleted' => auth()->id()]);
-        $roleCategory->delete();
-
-        return response()->json([
-            'message' => 'Role category deleted successfully'
-        ]);
     }
 
     /**
