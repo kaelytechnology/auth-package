@@ -114,7 +114,9 @@ class PermissionController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'slug']);
 
-        return response()->json($permissions);
+        return response()->json([
+            'data' => $permissions
+        ]);
     }
 
     /**
@@ -157,4 +159,4 @@ class PermissionController extends Controller
             'data' => $createdPermissions
         ], 201);
     }
-} 
+}
