@@ -32,13 +32,41 @@ class MenuController extends Controller
 
         $userPermissions = $user->getAllPermissions();
         $modulePermissionsMap = [];
+        $permittedModuleIds = [];
         foreach ($userPermissions as $perm) {
             $modulePermissionsMap[$perm->module_id][] = $perm->slug;
+            $permittedModuleIds[] = $perm->module_id;
+        }
+        $permittedModuleIds = array_unique($permittedModuleIds);
+
+        // Identificar todos los módulos visibles (directos + ancestros)
+        $visibleModuleIds = [];
+        
+        // Función auxiliar para agregar módulo y sus padres recursivamente
+        $addModuleAndAncestors = function($moduleId) use (&$visibleModuleIds, $modules, &$addModuleAndAncestors) {
+            if (in_array($moduleId, $visibleModuleIds)) {
+                return; // Ya procesado
+            }
+            
+            $module = $modules->firstWhere('id', $moduleId);
+            if (!$module) {
+                return;
+            }
+            
+            $visibleModuleIds[] = $moduleId;
+            
+            if ($module->parent_id) {
+                $addModuleAndAncestors($module->parent_id);
+            }
+        };
+
+        foreach ($permittedModuleIds as $moduleId) {
+            $addModuleAndAncestors($moduleId);
         }
 
-        // Filtrar módulos a los que el usuario tiene acceso
-        $modules = $modules->filter(function ($module) use ($modulePermissionsMap) {
-            return isset($modulePermissionsMap[$module->id]);
+        // Filtrar módulos a los que el usuario tiene acceso (directo o por herencia)
+        $modules = $modules->filter(function ($module) use ($visibleModuleIds) {
+            return in_array($module->id, $visibleModuleIds);
         });
 
         // Construir árbol de menú
@@ -183,13 +211,36 @@ class MenuController extends Controller
             ], 401);
         }
 
-        $userPermissions = $user->getAllPermissions();
-        $moduleIds = $userPermissions->pluck('module_id')->unique();
-
-        $modules = Module::whereIn('id', $moduleIds)
-            ->where('is_active', true)
+        // Obtener todos los módulos activos
+        $allModules = Module::where('is_active', true)
             ->orderBy('order')
             ->get(['id', 'name', 'slug', 'icon', 'route', 'order', 'parent_id']);
+
+        $userPermissions = $user->getAllPermissions();
+        $permittedModuleIds = $userPermissions->pluck('module_id')->unique()->toArray();
+
+        // Identificar todos los módulos visibles (directos + ancestros)
+        $visibleModuleIds = [];
+        
+        $addModuleAndAncestors = function($moduleId) use (&$visibleModuleIds, $allModules, &$addModuleAndAncestors) {
+            if (in_array($moduleId, $visibleModuleIds)) return;
+            
+            $module = $allModules->firstWhere('id', $moduleId);
+            if (!$module) return;
+            
+            $visibleModuleIds[] = $moduleId;
+            if ($module->parent_id) {
+                $addModuleAndAncestors($module->parent_id);
+            }
+        };
+
+        foreach ($permittedModuleIds as $moduleId) {
+            $addModuleAndAncestors($moduleId);
+        }
+
+        $modules = $allModules->filter(function ($module) use ($visibleModuleIds) {
+            return in_array($module->id, $visibleModuleIds);
+        });
 
         // Construir árbol de módulos
         $buildTree = function ($modules, $parentId = 0) use (&$buildTree) {

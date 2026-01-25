@@ -17,6 +17,7 @@ class ModuleController extends Controller
     public function index(Request $request): JsonResponse
     {
         $modules = Module::query()
+            ->where('is_active', 1)
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                       ->orWhere('slug', 'like', "%{$search}%");
@@ -25,7 +26,7 @@ class ModuleController extends Controller
                 $query->where('status', $status);
             })
             ->orderBy($request->sort_by ?? 'order', $request->sort_order ?? 'asc')
-            ->paginate($request->per_page ?? 15);
+            ->paginate($request->per_page ?? 200);
 
         return response()->json(new ModuleCollection($modules));
     }
@@ -145,4 +146,4 @@ class ModuleController extends Controller
             'message' => 'Module order updated successfully'
         ]);
     }
-} 
+}

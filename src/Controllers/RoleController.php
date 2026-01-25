@@ -19,12 +19,26 @@ class RoleController extends Controller
     {
         $roles = Role::query()
             ->with('permissions')
+            // Búsqueda por nombre o slug
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
                       ->orWhere('slug', 'like', "%{$search}%");
             })
-            ->when($request->status, function ($query, $status) {
-                $query->where('status', $status);
+            // Filtrar por categoría de rol si se proporciona role_category_id
+            ->when($request->has('role_category_id'), function ($query) use ($request) {
+                $query->where('role_category_id', $request->role_category_id);
+            })
+            // Permitir usar "category" como alias de role_category_id (ID de role_categories)
+            ->when($request->has('category'), function ($query) use ($request) {
+                $query->where('role_category_id', $request->category);
+            })
+            // Filtrar por estado usando "status" explícito
+            ->when($request->has('status'), function ($query) use ($request) {
+                $query->where('status', $request->boolean('status'));
+            })
+            // Permitir usar "is_active" como alias de "status" para roles
+            ->when($request->has('is_active'), function ($query) use ($request) {
+                $query->where('status', $request->boolean('is_active'));
             })
             ->orderBy($request->sort_by ?? 'name', $request->sort_order ?? 'asc')
             ->paginate($request->per_page ?? 15);
@@ -238,40 +252,147 @@ class RoleController extends Controller
     /**
      * Assign permissions to role.
      */
-    public function assignPermissions(Request $request, Role $role): JsonResponse
+    public function assignPermissions(Request $request, Role $role = null): JsonResponse
     {
-        $request->validate([
-            'permissions' => 'required|array',
-            'permissions.*' => 'exists:permissions,id',
-        ]);
+        try {
+            // Obtener el ID del rol desde múltiples fuentes
+            $roleId = null;
+            
+            // 1. Desde el objeto Role si está disponible
+            if ($role && $role->id) {
+                $roleId = $role->id;
+                //\Log::info('Role ID obtenido desde objeto Role', ['role_id' => $roleId]);
+            }
+            
+            // 2. Si no está en el objeto, intentar desde los parámetros de la ruta
+            if (!$roleId && $request->route('role')) {
+                $roleId = $request->route('role');
+               // \Log::info('Role ID obtenido desde parámetros de ruta', ['role_id' => $roleId]);
+            }
+            
+            // 3. Si no está en la ruta, intentar desde los inputs de la solicitud
+            if (!$roleId && $request->input('role_id')) {
+                $roleId = $request->input('role_id');
+               // \Log::info('Role ID obtenido desde input de solicitud', ['role_id' => $roleId]);
+            }
+            
+            // Validar que tenemos un ID de rol
+            if (!$roleId) {  
+                return response()->json([
+                    'message' => 'ID del rol requerido',
+                    'error' => 'ROLE_ID_REQUIRED'
+                ], 400);
+            }
+            
+            // Buscar el rol
+            $role = Role::find($roleId);
+            
+            if (!$role) {  
+                return response()->json([
+                    'message' => 'Rol no encontrado',
+                    'error' => 'ROLE_NOT_FOUND'
+                ], 404);
+            }
+              
+            $request->validate([
+                'permissions' => 'required|array',
+                'permissions.*' => 'exists:permissions,id',
+            ]);
 
-        $role->permissions()->sync($request->permissions);
+            $role->permissions()->sync($request->permissions);
 
-        $role->load('permissions');
+            $role->load('permissions');
+ 
+            return response()->json([
+                'message' => 'Permissions assigned successfully',
+                'data' => new RoleResource($role)
+            ]);
 
-        return response()->json([
-            'message' => 'Permissions assigned successfully',
-            'data' => new RoleResource($role)
-        ]);
+        } catch (\Exception $e) { 
+
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'error' => 'INTERNAL_SERVER_ERROR'
+            ], 500);
+        }
     }
 
     /**
      * Get role permissions.
      */
-    public function permissions(Role $role): JsonResponse
+    public function permissions(Role $role = null): JsonResponse
     {
-        $permissions = $role->permissions()
-            ->with('module')
-            ->orderBy('name')
-            ->get();
+        try {
+            // Obtener el ID del rol desde múltiples fuentes
+            $roleId = null;
+            
+            if ($role && $role->id) {
+                $roleId = $role->id;
+            } else {
+                // Intentar obtener desde los parámetros de la ruta
+                $roleId = request()->route('role') ?? request()->route('id');
+                
+                // Si no está en la ruta, intentar desde los inputs de la solicitud
+                if (!$roleId) {
+                    $roleId = request()->input('role_id') ?? request()->input('id');
+                }
+            }
 
-        return response()->json([
-            'role' => [
-                'id' => $role->id,
-                'name' => $role->name,
-                'slug' => $role->slug,
-            ],
-            'permissions' => $permissions
-        ]);
+            
+
+            // Validar que se obtuvo un ID
+            if (!$roleId) {
+                
+                
+                return response()->json([
+                    'message' => 'ID del rol requerido',
+                    'error' => 'ROLE_ID_REQUIRED'
+                ], 400);
+            }
+
+            // Buscar el rol
+            $role = Role::find($roleId);
+            
+            if (!$role) {
+                 
+                
+                return response()->json([
+                    'message' => 'Rol no encontrado',
+                    'error' => 'ROLE_NOT_FOUND'
+                ], 404);
+            }
+
+             
+
+            $permissions = $role->permissions()
+                ->with('module')
+                ->orderBy('module_id')
+                ->get();
+
+            // Formatear los permisos con los campos específicos requeridos
+            $formattedPermissions = $permissions->map(function ($permission) {
+                return [
+                    'permission_id' => $permission->id,
+                    'module_id' => $permission->module_id,
+                    'name' => $permission->name,
+                    'slug' => $permission->slug,
+                    'description' => $permission->description,
+                    'status' => $permission->status
+                ];
+            }); 
+
+            return response()->json([
+               
+                'data' => $formattedPermissions
+            ]);
+
+        } catch (\Exception $e) {
+            
+
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'error' => 'INTERNAL_SERVER_ERROR'
+            ], 500);
+        }
     }
 }
