@@ -3,6 +3,7 @@
 namespace Kaely\AuthPackage\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Kaely\AuthPackage\Http\Resources\RoleCategoryResource;
 
 class RoleResource extends JsonResource
 {
@@ -20,21 +21,10 @@ class RoleResource extends JsonResource
             'slug' => $this->slug,
             'description' => $this->description,
             'status' => $this->status,
+            'role_category' => new RoleCategoryResource($this->whenLoaded('roleCategory')),
+            'permissions_count' => $this->permissions_count,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'permissions' => $this->whenLoaded('permissions', function () {
-                return $this->permissions->map(function ($permission) {
-                    return [
-                        'id' => $permission->id,
-                        'name' => $permission->name,
-                        'slug' => $permission->slug,
-                        'module_id' => $permission->module_id,
-                    ];
-                });
-            }),
-            'permissions_count' => $this->whenLoaded('permissions', function () {
-                return $this->permissions->count();
-            }),
         ];
     }
-} 
+}

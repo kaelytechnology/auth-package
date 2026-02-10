@@ -18,11 +18,12 @@ class RoleController extends Controller
     public function index(Request $request): JsonResponse
     {
         $roles = Role::query()
-            ->with('permissions')
+            ->with('roleCategory')
+            ->withCount('permissions')
             // Búsqueda por nombre o slug
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('slug', 'like', "%{$search}%");
+                    ->orWhere('slug', 'like', "%{$search}%");
             })
             // Filtrar por categoría de rol si se proporciona role_category_id
             ->when($request->has('role_category_id'), function ($query) use ($request) {
@@ -86,13 +87,13 @@ class RoleController extends Controller
     /**
      * Update the specified role.
      */
-    public function update(Request $request, Role $role = null): JsonResponse
+    public function update(Request $request, ?Role $role = null): JsonResponse
     {
         try {
             // Obtener el ID del rol de múltiples fuentes posibles
             $routeParams = $request->route()->parameters();
             $actualRoleId = ($role ? $role->id : null) ?? $routeParams['role'] ?? $request->input('role_id') ?? $request->input('id');
-            
+
             // Log inicial con información de la request
             \Log::info('RoleController::update called', [
                 'role_object_id' => $role ? $role->id : null,
@@ -101,7 +102,7 @@ class RoleController extends Controller
                 'request_data' => $request->all(),
                 'all_roles' => Role::select('id', 'name', 'slug')->get()->toArray()
             ]);
-            
+
             // Validar que tenemos un ID de rol válido
             if (!$actualRoleId) {
                 \Log::error('RoleController::update - No role ID found', [
@@ -109,7 +110,7 @@ class RoleController extends Controller
                     'route_params' => $routeParams,
                     'request_inputs' => $request->all()
                 ]);
-                
+
                 return response()->json([
                     'message' => 'Role ID not found',
                     'debug' => [
@@ -118,7 +119,7 @@ class RoleController extends Controller
                     ]
                 ], 400);
             }
-            
+
             // Buscar el rol si no lo tenemos
             if (!$role || !$role->id) {
                 $role = Role::find($actualRoleId);
@@ -151,7 +152,7 @@ class RoleController extends Controller
                 'message' => 'Role updated successfully',
                 'data' => new RoleResource($role)
             ]);
-            
+
         } catch (\Exception $e) {
             \Log::error('Error updating role', [
                 'role_id' => $actualRoleId ?? 'unknown',
@@ -159,7 +160,7 @@ class RoleController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'request_data' => $request->all()
             ]);
-            
+
             return response()->json([
                 'message' => 'Error updating role',
                 'error' => $e->getMessage()
@@ -170,15 +171,15 @@ class RoleController extends Controller
     /**
      * Remove the specified role.
      */
-    public function destroy(Role $role = null): JsonResponse
+    public function destroy(?Role $role = null): JsonResponse
     {
         try {
             // Obtener parámetros de la ruta
-            $routeParams = request()->route()->parameters(); 
+            $routeParams = request()->route()->parameters();
 
             // Obtener el ID del rol desde múltiples fuentes
             $roleId = null;
-            
+
             if ($role && $role->id) {
                 $roleId = $role->id;
             } elseif (isset($routeParams['role'])) {
@@ -189,7 +190,7 @@ class RoleController extends Controller
                 $roleId = request()->input('id');
             }
 
-            if (!$roleId) { 
+            if (!$roleId) {
                 return response()->json([
                     'message' => 'Role ID not found',
                     'debug_info' => [
@@ -202,33 +203,33 @@ class RoleController extends Controller
             // Si no tenemos el objeto role o no tiene ID, buscarlo
             if (!$role || !$role->id) {
                 $role = Role::find($roleId);
-                
-                if (!$role) { 
-                    
+
+                if (!$role) {
+
                     return response()->json([
                         'message' => 'Role not found'
                     ], 404);
                 }
             }
- 
+
 
             // Verificar si hay usuarios asociados
-            if ($role->users()->count() > 0) { 
-                
+            if ($role->users()->count() > 0) {
+
                 return response()->json([
                     'message' => 'Cannot delete role with associated users'
                 ], 422);
             }
 
             $deletedRole = $role->toArray();
-            $role->delete(); 
-            
+            $role->delete();
+
 
             return response()->json([
                 'message' => 'Role deleted successfully'
             ]);
 
-        } catch (\Exception $e) { 
+        } catch (\Exception $e) {
 
             return response()->json([
                 'message' => 'Error deleting role',
@@ -252,48 +253,48 @@ class RoleController extends Controller
     /**
      * Assign permissions to role.
      */
-    public function assignPermissions(Request $request, Role $role = null): JsonResponse
+    public function assignPermissions(Request $request, ?Role $role = null): JsonResponse
     {
         try {
             // Obtener el ID del rol desde múltiples fuentes
             $roleId = null;
-            
+
             // 1. Desde el objeto Role si está disponible
             if ($role && $role->id) {
                 $roleId = $role->id;
                 //\Log::info('Role ID obtenido desde objeto Role', ['role_id' => $roleId]);
             }
-            
+
             // 2. Si no está en el objeto, intentar desde los parámetros de la ruta
             if (!$roleId && $request->route('role')) {
                 $roleId = $request->route('role');
-               // \Log::info('Role ID obtenido desde parámetros de ruta', ['role_id' => $roleId]);
+                // \Log::info('Role ID obtenido desde parámetros de ruta', ['role_id' => $roleId]);
             }
-            
+
             // 3. Si no está en la ruta, intentar desde los inputs de la solicitud
             if (!$roleId && $request->input('role_id')) {
                 $roleId = $request->input('role_id');
-               // \Log::info('Role ID obtenido desde input de solicitud', ['role_id' => $roleId]);
+                // \Log::info('Role ID obtenido desde input de solicitud', ['role_id' => $roleId]);
             }
-            
+
             // Validar que tenemos un ID de rol
-            if (!$roleId) {  
+            if (!$roleId) {
                 return response()->json([
                     'message' => 'ID del rol requerido',
                     'error' => 'ROLE_ID_REQUIRED'
                 ], 400);
             }
-            
+
             // Buscar el rol
             $role = Role::find($roleId);
-            
-            if (!$role) {  
+
+            if (!$role) {
                 return response()->json([
                     'message' => 'Rol no encontrado',
                     'error' => 'ROLE_NOT_FOUND'
                 ], 404);
             }
-              
+
             $request->validate([
                 'permissions' => 'required|array',
                 'permissions.*' => 'exists:permissions,id',
@@ -302,13 +303,13 @@ class RoleController extends Controller
             $role->permissions()->sync($request->permissions);
 
             $role->load('permissions');
- 
+
             return response()->json([
                 'message' => 'Permissions assigned successfully',
                 'data' => new RoleResource($role)
             ]);
 
-        } catch (\Exception $e) { 
+        } catch (\Exception $e) {
 
             return response()->json([
                 'message' => 'Error interno del servidor',
@@ -320,30 +321,30 @@ class RoleController extends Controller
     /**
      * Get role permissions.
      */
-    public function permissions(Role $role = null): JsonResponse
+    public function permissions(?Role $role = null): JsonResponse
     {
         try {
             // Obtener el ID del rol desde múltiples fuentes
             $roleId = null;
-            
+
             if ($role && $role->id) {
                 $roleId = $role->id;
             } else {
                 // Intentar obtener desde los parámetros de la ruta
                 $roleId = request()->route('role') ?? request()->route('id');
-                
+
                 // Si no está en la ruta, intentar desde los inputs de la solicitud
                 if (!$roleId) {
                     $roleId = request()->input('role_id') ?? request()->input('id');
                 }
             }
 
-            
+
 
             // Validar que se obtuvo un ID
             if (!$roleId) {
-                
-                
+
+
                 return response()->json([
                     'message' => 'ID del rol requerido',
                     'error' => 'ROLE_ID_REQUIRED'
@@ -352,17 +353,17 @@ class RoleController extends Controller
 
             // Buscar el rol
             $role = Role::find($roleId);
-            
+
             if (!$role) {
-                 
-                
+
+
                 return response()->json([
                     'message' => 'Rol no encontrado',
                     'error' => 'ROLE_NOT_FOUND'
                 ], 404);
             }
 
-             
+
 
             $permissions = $role->permissions()
                 ->with('module')
@@ -379,15 +380,15 @@ class RoleController extends Controller
                     'description' => $permission->description,
                     'status' => $permission->status
                 ];
-            }); 
+            });
 
             return response()->json([
-               
+
                 'data' => $formattedPermissions
             ]);
 
         } catch (\Exception $e) {
-            
+
 
             return response()->json([
                 'message' => 'Error interno del servidor',
