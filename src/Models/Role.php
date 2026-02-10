@@ -17,7 +17,8 @@ class Role extends Model
         'role_category_id',
         'user_add',
         'user_edit',
-        'user_deleted'
+        'user_deleted',
+        'status'
     ];
 
     protected $casts = [
@@ -83,7 +84,7 @@ class Role extends Model
             return $this->permissions->contains('slug', $permission);
         }
 
-        return !! $permission->intersect($this->permissions)->count();
+        return !!$permission->intersect($this->permissions)->count();
     }
 
     /**
@@ -98,4 +99,4 @@ class Role extends Model
             $this->permissions()->sync($permissions);
         }
     }
-} 
+}

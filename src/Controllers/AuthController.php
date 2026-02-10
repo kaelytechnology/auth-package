@@ -48,7 +48,7 @@ class AuthController extends Controller
      * )
      */
     public function login(Request $request): JsonResponse
-    {        
+    {
         $request->validate([
             'email' => 'required|email',
             'password' => 'required',
@@ -57,7 +57,7 @@ class AuthController extends Controller
         // ✅ Compatible con Laravel 12 y Sanctum
         // Usar el guard 'web' para autenticación y luego crear token Sanctum
         $credentials = $request->only('email', 'password');
-        
+
         // Intentar autenticación con el guard web
         if (!Auth::guard('web')->attempt($credentials)) {
             throw ValidationException::withMessages([
@@ -65,9 +65,17 @@ class AuthController extends Controller
             ]);
         }
 
-        $user = User::where('email', $request->email)
-            ->with(['person', 'roles'])
-            ->firstOrFail();
+        $userModel = config('auth.providers.users.model', User::class);
+
+        $query = $userModel::where('email', $request->email)
+            ->with(['person', 'roles.roleCategory']);
+
+        // Eager load restaurants if the relationship exists on the model
+        if (method_exists($userModel, 'restaurants')) {
+            $query->with('restaurants');
+        }
+
+        $user = $query->firstOrFail();
 
         // Verificar si el usuario está activo
         if (!$user->isActive()) {
@@ -143,7 +151,7 @@ class AuthController extends Controller
     public function register(Request $request): JsonResponse
     {
         $config = config('auth-package.validation');
-        
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -166,7 +174,7 @@ class AuthController extends Controller
             'message' => 'User registered successfully',
             'user' => new UserResource($user)
         ], 201);
-    }   
+    }
 
     /**
      * @OA\Get(
@@ -188,7 +196,12 @@ class AuthController extends Controller
      */
     public function me(Request $request): JsonResponse
     {
-        $user = $request->user()->load(['person', 'roles']);
+        $relationships = ['person', 'roles.roleCategory'];
+        if (method_exists($request->user(), 'restaurants')) {
+            $relationships[] = 'restaurants';
+        }
+
+        $user = $request->user()->load($relationships);
         return response()->json(new UserResource($user));
     }
 
@@ -216,10 +229,10 @@ class AuthController extends Controller
     public function refresh(Request $request): JsonResponse
     {
         $user = $request->user();
-        
+
         // Revocar token actual
         $user->currentAccessToken()->delete();
-        
+
         // Crear nuevo token
         $token = $user->createToken('auth_token')->plainTextToken;
 

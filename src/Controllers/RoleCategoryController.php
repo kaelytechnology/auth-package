@@ -21,9 +21,20 @@ class RoleCategoryController extends Controller
         $roleCategories = RoleCategory::query()
             ->with('roles')
             ->when($request->search, function ($query, $search) {
-                $query->where('name', 'like', "%{$search}%")
-                      ->orWhere('slug', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%");
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('slug', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->pms_restaurant_id, function ($query, $restaurantId) {
+                // If specific restaurant requested
+                $query->forRestaurant($restaurantId);
+            }, function ($query) {
+                // If NO restaurant requested -> Default to Global
+                // NOTE: If you want to show ALL (Global + All Restaurants) for SuperAdmin, logic goes here.
+                // For now, default to Global.
+                $query->global();
             })
             ->orderBy($request->sort_by ?? 'name', $request->sort_order ?? 'asc')
             ->paginate($request->per_page ?? 15);
@@ -40,15 +51,16 @@ class RoleCategoryController extends Controller
             'name' => 'required|string|max:255',
             'slug' => 'nullable|string|max:100|unique:role_categories,slug',
             'description' => 'nullable|string|max:500',
+            'pms_restaurant_id' => 'nullable|exists:tenant.pms_restaurants,id',
         ]);
 
         $data = $request->all();
-        
+
         // Auto-generar slug si no se proporciona
         if (empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
-        
+
         // Agregar usuario que crea
         $data['user_add'] = auth()->id();
 
@@ -79,11 +91,11 @@ class RoleCategoryController extends Controller
     {
         try {
             // Obtener parámetros de la ruta
-            $routeParams = $request->route()->parameters();            
-           
+            $routeParams = $request->route()->parameters();
+
             // Obtener el ID de la categoría de rol desde múltiples fuentes
             $roleCategoryId = null;
-            
+
             if ($roleCategory && $roleCategory->id) {
                 $roleCategoryId = $roleCategory->id;
             } elseif (isset($routeParams['roleCategory'])) {
@@ -97,8 +109,8 @@ class RoleCategoryController extends Controller
             }
 
             if (!$roleCategoryId) {
-                
-                
+
+
                 return response()->json([
                     'message' => 'Role Category ID not found',
                     'debug_info' => [
@@ -111,9 +123,9 @@ class RoleCategoryController extends Controller
             // Si no tenemos el objeto roleCategory o no tiene ID, buscarlo
             if (!$roleCategory || !$roleCategory->id) {
                 $roleCategory = RoleCategory::find($roleCategoryId);
-                
+
                 if (!$roleCategory) {
-                    
+
                     return response()->json([
                         'message' => 'Role Category not found'
                     ], 404);
@@ -129,17 +141,17 @@ class RoleCategoryController extends Controller
                 'is_active' => 'nullable|boolean',
             ]);
 
-            $data = $request->all(); 
-          
+            $data = $request->all();
+
             // Agregar usuario que edita
             $data['user_edit'] = Auth::id();
 
-          
+
 
             $roleCategory->update($data);
             $roleCategory->load('roles');
 
-            
+
 
             return response()->json([
                 'message' => 'Role category updated successfully',
@@ -147,7 +159,7 @@ class RoleCategoryController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            
+
 
             return response()->json([
                 'message' => 'Error updating role category',
@@ -167,7 +179,7 @@ class RoleCategoryController extends Controller
 
             // Obtener el ID de la categoría de rol desde múltiples fuentes
             $roleCategoryId = null;
-            
+
             if ($roleCategory && $roleCategory->id) {
                 $roleCategoryId = $roleCategory->id;
             } elseif (isset($routeParams['roleCategory'])) {
@@ -181,8 +193,8 @@ class RoleCategoryController extends Controller
             }
 
             if (!$roleCategoryId) {
-                
-                
+
+
                 return response()->json([
                     'message' => 'Role Category ID not found',
                     'debug_info' => [
@@ -195,22 +207,22 @@ class RoleCategoryController extends Controller
             // Si no tenemos el objeto roleCategory o no tiene ID, buscarlo
             if (!$roleCategory || !$roleCategory->id) {
                 $roleCategory = RoleCategory::find($roleCategoryId);
-                
+
                 if (!$roleCategory) {
-                    
-                    
+
+
                     return response()->json([
                         'message' => 'Role Category not found'
                     ], 404);
                 }
             }
 
-           
+
 
             // Verificar si hay roles asociados
             if ($roleCategory->roles()->count() > 0) {
-                
-                
+
+
                 return response()->json([
                     'message' => 'Cannot delete role category with associated roles'
                 ], 422);
@@ -220,19 +232,19 @@ class RoleCategoryController extends Controller
 
             // Agregar usuario que elimina antes del soft delete
             $roleCategory->update(['user_deleted' => auth()->id()]);
-            
-           
+
+
 
             $roleCategory->delete();
 
-            
+
 
             return response()->json([
                 'message' => 'Role category deleted successfully'
             ]);
 
         } catch (\Exception $e) {
-           
+
 
             return response()->json([
                 'message' => 'Error deleting role category',
@@ -246,8 +258,14 @@ class RoleCategoryController extends Controller
      */
     public function active(): JsonResponse
     {
-        $roleCategories = RoleCategory::orderBy('name')
-            ->get(['id', 'name', 'slug', 'description']);
+        $roleCategories = RoleCategory::query()
+            ->when(request('pms_restaurant_id'), function ($query, $restaurantId) {
+                $query->forRestaurant($restaurantId);
+            }, function ($query) {
+                $query->global();
+            })
+            ->orderBy('name')
+            ->get(['id', 'name', 'slug', 'description', 'pms_restaurant_id']);
 
         return response()->json($roleCategories);
     }
