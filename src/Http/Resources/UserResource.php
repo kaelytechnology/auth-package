@@ -63,7 +63,7 @@ class UserResource extends JsonResource
         $data['rol_id'] = $this->whenLoaded('roles') && $this->roles->isNotEmpty()
             ? $this->roles->first()->id
             : null;
-            
+
         // Restaurant Context
         $data['current_restaurant_id'] = $this->current_restaurant_id ?? null;
 
