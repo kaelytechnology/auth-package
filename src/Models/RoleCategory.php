@@ -17,7 +17,8 @@ class RoleCategory extends Model
         'is_active',
         'user_add',
         'user_edit',
-        'user_deleted'
+        'user_deleted',
+        'pms_restaurant_id'
     ];
 
     protected $casts = [
@@ -25,6 +26,7 @@ class RoleCategory extends Model
         'user_add' => 'integer',
         'user_edit' => 'integer',
         'user_deleted' => 'integer',
+        'pms_restaurant_id' => 'integer',
     ];
 
     /**
@@ -57,5 +59,28 @@ class RoleCategory extends Model
     public function userDeleted()
     {
         return $this->belongsTo(User::class, 'user_deleted');
+    }
+
+    /**
+     * Scope a query to only include role categories for a specific restaurant.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param int|string $restaurantId
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForRestaurant($query, $restaurantId)
+    {
+        return $query->where('pms_restaurant_id', $restaurantId);
+    }
+
+    /**
+     * Scope a query to only include global role categories.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeGlobal($query)
+    {
+        return $query->whereNull('pms_restaurant_id');
     }
 }
